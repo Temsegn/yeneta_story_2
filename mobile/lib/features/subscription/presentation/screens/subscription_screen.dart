@@ -487,6 +487,27 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     style: TextStyle(fontSize: 12, color: Colors.black54),
                   ),
                 ),
+                const SizedBox(height: 8),
+                Container(
+                  width: double.infinity,
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFFFF7E6),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: const Color(0xFFFFD591)),
+                  ),
+                  child: const Text(
+                    'Test mode: on Chapa checkout use phone 0900123456 '
+                    '(OTP 12345). Real phone numbers will fail in test mode.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      height: 1.35,
+                      color: Color(0xFF8B5A00),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
               ],
             ),
           ),

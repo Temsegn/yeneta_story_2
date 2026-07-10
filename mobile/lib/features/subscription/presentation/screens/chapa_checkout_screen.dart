@@ -244,9 +244,10 @@ class _WebCheckoutPlaceholder extends StatelessWidget {
             ),
             const SizedBox(height: 10),
             Text(
-              'Complete payment there, then return and tap Done.',
+              'Complete payment there, then return and tap Done.\n\n'
+              'Test mode phone: 0900123456  ·  OTP: 12345',
               textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade700),
+              style: TextStyle(fontSize: 15, color: Colors.grey.shade700, height: 1.4),
             ),
             const SizedBox(height: 24),
             SizedBox(

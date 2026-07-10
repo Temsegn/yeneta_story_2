@@ -56,7 +56,8 @@ class _AuthScreenShellState extends State<AuthScreenShell>
   @override
   Widget build(BuildContext context) {
     final media = MediaQuery.of(context);
-    final compact = media.size.height < 760;
+    final compact = media.size.height < 780;
+    final bottomPad = media.padding.bottom + media.viewInsets.bottom;
 
     return Scaffold(
       resizeToAvoidBottomInset: true,
@@ -64,48 +65,61 @@ class _AuthScreenShellState extends State<AuthScreenShell>
         gradientColors: widget.gradientColors,
         child: SafeArea(
           bottom: false,
-          child: Column(
-            children: [
-              if (widget.showBackButton)
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Padding(
-                    padding: const EdgeInsets.only(left: 12, top: 4),
-                    child: _GlassIconButton(
-                      icon: Icons.arrow_back_rounded,
-                      onPressed: widget.onBack,
-                    ),
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              return SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                keyboardDismissBehavior:
+                    ScrollViewKeyboardDismissBehavior.onDrag,
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                  child: Column(
+                    children: [
+                      if (widget.showBackButton)
+                        Align(
+                          alignment: Alignment.centerLeft,
+                          child: Padding(
+                            padding: const EdgeInsets.only(left: 12, top: 4),
+                            child: _GlassIconButton(
+                              icon: Icons.arrow_back_rounded,
+                              onPressed: widget.onBack,
+                            ),
+                          ),
+                        ),
+                      Padding(
+                        padding: EdgeInsets.only(
+                          top: widget.showBackButton ? 4 : 8,
+                          bottom: compact ? 8 : 12,
+                        ),
+                        child: ScaleTransition(
+                          scale: Tween<double>(begin: 0.92, end: 1).animate(
+                            CurvedAnimation(
+                              parent: _controller,
+                              curve: Curves.elasticOut,
+                            ),
+                          ),
+                          child: _HeroHeader(
+                            title: widget.title,
+                            subtitle: widget.subtitle,
+                            compact: compact,
+                          ),
+                        ),
+                      ),
+                      FadeTransition(
+                        opacity: _fade,
+                        child: SlideTransition(
+                          position: _slide,
+                          child: _AuthFormCard(
+                            bottomPadding: 20 + bottomPad,
+                            child: widget.formChild,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-              Padding(
-                padding: EdgeInsets.only(
-                  top: widget.showBackButton ? 4 : 8,
-                  bottom: compact ? 8 : 12,
-                ),
-                child: ScaleTransition(
-                  scale: Tween<double>(begin: 0.92, end: 1).animate(
-                    CurvedAnimation(
-                      parent: _controller,
-                      curve: Curves.elasticOut,
-                    ),
-                  ),
-                  child: _HeroHeader(
-                    title: widget.title,
-                    subtitle: widget.subtitle,
-                    compact: compact,
-                  ),
-                ),
-              ),
-              Expanded(
-                child: FadeTransition(
-                  opacity: _fade,
-                  child: SlideTransition(
-                    position: _slide,
-                    child: _AuthFormCard(child: widget.formChild),
-                  ),
-                ),
-              ),
-            ],
+              );
+            },
           ),
         ),
       ),
@@ -170,15 +184,16 @@ class _HeroHeader extends StatelessWidget {
 }
 
 class _AuthFormCard extends StatelessWidget {
-  const _AuthFormCard({required this.child});
+  const _AuthFormCard({
+    required this.child,
+    this.bottomPadding = 24,
+  });
 
   final Widget child;
+  final double bottomPadding;
 
   @override
   Widget build(BuildContext context) {
-    final bottomInset = MediaQuery.paddingOf(context).bottom;
-    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
-
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
@@ -192,20 +207,8 @@ class _AuthFormCard extends StatelessWidget {
           ),
         ],
       ),
-      child: ClipRRect(
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
-        child: SingleChildScrollView(
-          physics: const BouncingScrollPhysics(),
-          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
-          padding: EdgeInsets.fromLTRB(
-            24,
-            24,
-            24,
-            20 + bottomInset + keyboard,
-          ),
-          child: child,
-        ),
-      ),
+      padding: EdgeInsets.fromLTRB(24, 24, 24, bottomPadding),
+      child: child,
     );
   }
 }

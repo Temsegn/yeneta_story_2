@@ -161,10 +161,13 @@ export async function checkoutSubscription(userId, planId) {
       ? process.env.CHAPA_RETURN_URL
       : `${baseUrl}/api/v1/payments/chapa/return?status=success`;
 
-  const chapaPhone =
-    toChapaPhone(user.phoneNumber) ||
-    toChapaPhone("0912345678") ||
-    "0912345678";
+  const isTestMode = String(CHAPA_SECRET_KEY || "").includes("TEST");
+  // In test mode Chapa ONLY accepts official test phones — real numbers fail
+  // on "Pay with test mode". See https://developer.chapa.co/test/testing-mobile
+  const CHAPA_TEST_PHONE = "0900123456";
+  const chapaPhone = isTestMode
+    ? CHAPA_TEST_PHONE
+    : toChapaPhone(user.phoneNumber) || CHAPA_TEST_PHONE;
 
   // Email is optional on our users; Chapa still expects a valid email when sent.
   const chapaEmail =
