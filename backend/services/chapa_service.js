@@ -75,12 +75,44 @@ function splitName(fullName = "") {
   return { firstName, lastName };
 }
 
+function formatChapaError(data) {
+  if (!data) return "Chapa API error";
+  const msg = data.message ?? data.error ?? data;
+  if (typeof msg === "string") return msg;
+  if (Array.isArray(msg)) {
+    return msg
+      .map((item) => {
+        if (typeof item === "string") return item;
+        if (item && typeof item === "object") {
+          return Object.values(item).flat().join(", ");
+        }
+        return String(item);
+      })
+      .filter(Boolean)
+      .join("; ");
+  }
+  if (typeof msg === "object") {
+    try {
+      return JSON.stringify(msg);
+    } catch {
+      return "Chapa API error";
+    }
+  }
+  return String(msg);
+}
+
 /**
  * POST /subscriptions/checkout
  * Body: { planId } only — amount comes from SUBSCRIPTION_PLANS.
  * Creates a PENDING subscription, pending payment, then initializes Chapa.
  */
 export async function checkoutSubscription(userId, planId) {
+  if (!CHAPA_SECRET_KEY) {
+    throw new Error(
+      "Payment is not configured (missing CHAPA_SECRET_KEY on server)."
+    );
+  }
+
   const plan = SUBSCRIPTION_PLANS[planId];
   if (!plan) {
     throw new Error(
@@ -101,21 +133,12 @@ export async function checkoutSubscription(userId, planId) {
     throw new Error("You already have an active subscription");
   }
 
-  // Clean stale pending checkout attempts (>30 min).
-  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+  // Abandon any previous pending checkouts so retries always get a fresh tx_ref.
   await Subscription.updateMany(
-    {
-      user: userId,
-      status: "pending",
-      createdAt: { $lt: thirtyMinutesAgo },
-    },
+    { user: userId, status: "pending" },
     { $set: { status: "failed" } }
   );
-  await Payment.deleteMany({
-    userId,
-    status: "pending",
-    createdAt: { $lt: thirtyMinutesAgo },
-  });
+  await Payment.deleteMany({ userId, status: "pending" });
 
   let txRef;
   for (let i = 0; i < 5; i++) {
@@ -156,10 +179,10 @@ export async function checkoutSubscription(userId, planId) {
 
   // Chapa requires an https return_url. Custom schemes (myapp://) break the
   // hosted checkout page (often surfaces as a generic 419 error).
-  const returnUrl =
-    process.env.CHAPA_RETURN_URL?.startsWith("http")
-      ? process.env.CHAPA_RETURN_URL
-      : `${baseUrl}/api/v1/payments/chapa/return?status=success`;
+  const configuredReturn = process.env.CHAPA_RETURN_URL || "";
+  const returnUrl = configuredReturn.startsWith("http")
+    ? configuredReturn
+    : `${baseUrl}/api/v1/payments/chapa/return?status=success`;
 
   const isTestMode = String(CHAPA_SECRET_KEY || "").includes("TEST");
   // In test mode Chapa ONLY accepts official test phones — real numbers fail
@@ -175,29 +198,32 @@ export async function checkoutSubscription(userId, planId) {
       ? String(user.email).slice(0, 50)
       : `user${String(user._id).slice(-8)}@customers.yeneta.app`;
 
+  const payload = {
+    amount: plan.price.toString(),
+    currency: "ETB",
+    email: chapaEmail,
+    first_name: firstName.slice(0, 35),
+    last_name: lastName.slice(0, 35),
+    phone_number: chapaPhone,
+    tx_ref: txRef,
+    callback_url: callbackUrl,
+    return_url: returnUrl,
+    customization: {
+      title: plan.name.slice(0, 16),
+      description: `Subscribe for ${plan.durationDays} days`.slice(0, 50),
+    },
+  };
+
   try {
     const response = await axios.post(
       `${CHAPA_BASE_URL}/transaction/initialize`,
-      {
-        amount: plan.price.toString(),
-        currency: "ETB",
-        email: chapaEmail,
-        first_name: firstName.slice(0, 35),
-        last_name: lastName.slice(0, 35),
-        phone_number: chapaPhone,
-        tx_ref: txRef,
-        callback_url: callbackUrl,
-        return_url: returnUrl,
-        customization: {
-          title: plan.name.slice(0, 16),
-          description: `Subscribe for ${plan.durationDays} days`.slice(0, 50),
-        },
-      },
+      payload,
       {
         headers: {
           Authorization: `Bearer ${CHAPA_SECRET_KEY}`,
           "Content-Type": "application/json",
         },
+        timeout: 30000,
       }
     );
 
@@ -205,7 +231,9 @@ export async function checkoutSubscription(userId, planId) {
       await Payment.findByIdAndDelete(payment._id);
       subscription.status = "failed";
       await subscription.save();
-      throw new Error(response.data.message || "Payment initialization failed");
+      throw new Error(
+        formatChapaError(response.data) || "Payment initialization failed"
+      );
     }
 
     return {
@@ -216,16 +244,20 @@ export async function checkoutSubscription(userId, planId) {
       currency: "ETB",
     };
   } catch (error) {
-    await Payment.findByIdAndDelete(payment._id);
+    await Payment.findByIdAndDelete(payment._id).catch(() => {});
     subscription.status = "failed";
-    await subscription.save();
+    await subscription.save().catch(() => {});
 
     if (error.response) {
-      throw new Error(
-        error.response.data?.message ||
-          error.response.data?.error ||
-          "Chapa API error"
-      );
+      console.error("Chapa initialize failed:", {
+        status: error.response.status,
+        data: error.response.data,
+        payload: { ...payload, email: "[redacted]" },
+      });
+      throw new Error(formatChapaError(error.response.data));
+    }
+    if (error.message && !error.message.startsWith("Chapa")) {
+      console.error("Checkout error:", error.message);
     }
     throw error;
   }

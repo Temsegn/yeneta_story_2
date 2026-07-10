@@ -46,6 +46,7 @@ export const checkoutSubscription = async (req, res) => {
         typeof error.message === "string"
           ? error.message
           : "Checkout initialization failed",
+      code: "CHECKOUT_FAILED",
     });
   }
 };
