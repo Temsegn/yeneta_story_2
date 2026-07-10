@@ -152,7 +152,7 @@ export async function checkoutSubscription(userId, planId) {
   const returnUrl =
     process.env.CHAPA_RETURN_URL ||
     process.env.FRONTEND_URL ||
-    "myapp://payment-result";
+    "myapp://payment-result?status=success";
 
   try {
     const response = await axios.post(

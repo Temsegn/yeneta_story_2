@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:kids_app/core/config/payment_config.dart';
 
-/// Opens Chapa checkout_url in an in-app WebView.
-/// Pops with status: 'success' | 'failed' | 'cancelled'.
+/// Opens Chapa `checkout_url` in an in-app WebView.
+/// Pops with status: `success` | `failed` | `cancelled`.
 class ChapaCheckoutScreen extends StatefulWidget {
   final String checkoutUrl;
   final String txRef;
@@ -20,6 +21,7 @@ class ChapaCheckoutScreen extends StatefulWidget {
 class _ChapaCheckoutScreenState extends State<ChapaCheckoutScreen> {
   double _progress = 0;
   bool _finished = false;
+  InAppWebViewController? _webViewController;
 
   void _finish(String status) {
     if (_finished || !mounted) return;
@@ -27,32 +29,22 @@ class _ChapaCheckoutScreenState extends State<ChapaCheckoutScreen> {
     Navigator.of(context).pop(status);
   }
 
-  void _handleUrl(String url) {
-    final lower = url.toLowerCase();
+  void _handleUrl(String? url) {
+    if (url == null || url.isEmpty) return;
 
-    // Deep-link / return URL patterns used by backend FRONTEND_URL / CHAPA_RETURN_URL.
-    final looksLikeReturn = lower.contains('payment-result') ||
-        lower.contains('payment-return') ||
-        lower.contains('payment-callback') ||
-        lower.startsWith('myapp://');
+    if (!PaymentConfig.isReturnUrl(url)) return;
 
-    if (!looksLikeReturn) return;
-
-    if (lower.contains('success') ||
-        lower.contains('status=success') ||
-        lower.contains('paid')) {
+    final status = PaymentConfig.statusFromReturnUrl(url);
+    if (status == 'success') {
       _finish('success');
       return;
     }
-
-    if (lower.contains('fail') ||
-        lower.contains('cancel') ||
-        lower.contains('error')) {
+    if (status == 'failed') {
       _finish('failed');
       return;
     }
 
-    // Ambiguous return — treat as success candidate; parent will verify with backend.
+    // Ambiguous deep link — parent verifies with backend using txRef.
     _finish('success');
   }
 
@@ -72,32 +64,60 @@ class _ChapaCheckoutScreenState extends State<ChapaCheckoutScreen> {
             icon: const Icon(Icons.close),
             onPressed: () => _finish('cancelled'),
           ),
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip: 'Reload checkout',
+              onPressed: () {
+                _webViewController?.reload();
+              },
+            ),
+          ],
         ),
         body: Stack(
           children: [
             InAppWebView(
-              initialUrlRequest: URLRequest(url: WebUri(widget.checkoutUrl)),
+              initialUrlRequest: URLRequest(
+                url: WebUri(widget.checkoutUrl),
+              ),
               initialSettings: InAppWebViewSettings(
                 javaScriptEnabled: true,
+                domStorageEnabled: true,
                 useShouldOverrideUrlLoading: true,
                 mediaPlaybackRequiresUserGesture: false,
+                allowsInlineMediaPlayback: true,
+                supportMultipleWindows: true,
+                javaScriptCanOpenWindowsAutomatically: true,
+                useHybridComposition: true,
               ),
+              onWebViewCreated: (controller) {
+                _webViewController = controller;
+              },
               onProgressChanged: (_, progress) {
                 if (mounted) setState(() => _progress = progress / 100);
               },
-              onLoadStart: (_, url) {
-                if (url != null) _handleUrl(url.toString());
+              onLoadStart: (controller, url) {
+                _handleUrl(url?.toString());
               },
-              onLoadStop: (_, url) {
-                if (url != null) _handleUrl(url.toString());
+              onLoadStop: (controller, url) {
+                _handleUrl(url?.toString());
+              },
+              onUpdateVisitedHistory: (controller, url, __) {
+                _handleUrl(url?.toString());
               },
               shouldOverrideUrlLoading: (controller, action) async {
                 final url = action.request.url?.toString() ?? '';
                 _handleUrl(url);
-                if (url.startsWith('myapp://')) {
+
+                if (url.toLowerCase().startsWith('${PaymentConfig.returnScheme}://')) {
                   return NavigationActionPolicy.CANCEL;
                 }
                 return NavigationActionPolicy.ALLOW;
+              },
+              onReceivedError: (controller, request, error) {
+                debugPrint(
+                  'Chapa WebView error: ${error.description} (${request.url})',
+                );
               },
             ),
             if (_progress < 1.0)
