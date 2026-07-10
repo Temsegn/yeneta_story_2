@@ -2,12 +2,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:kids_app/core/config/payment_config.dart';
-import 'package:url_launcher/url_launcher.dart';
 
-/// Opens Chapa `checkout_url`.
-/// - Mobile: in-app WebView
-/// - Web: external browser tab (WebView often breaks Chapa CSRF → 419)
-/// Pops with status: `success` | `failed` | `cancelled` | `expired`.
+/// Opens Chapa checkout in an in-app WebView, then returns to the app
+/// when Chapa redirects to our HTTPS return page or `myapp://` deep link.
+///
+/// Pops with: `success` | `failed` | `cancelled` | `expired`
 class ChapaCheckoutScreen extends StatefulWidget {
   final String checkoutUrl;
   final String txRef;
@@ -26,55 +25,7 @@ class _ChapaCheckoutScreenState extends State<ChapaCheckoutScreen> {
   double _progress = 0;
   bool _finished = false;
   bool _sessionExpired = false;
-  bool _webLaunchStarted = false;
   InAppWebViewController? _webViewController;
-
-  @override
-  void initState() {
-    super.initState();
-    if (kIsWeb) {
-      WidgetsBinding.instance.addPostFrameCallback((_) => _openExternalCheckout());
-    }
-  }
-
-  Future<void> _openExternalCheckout() async {
-    if (_webLaunchStarted) return;
-    _webLaunchStarted = true;
-    final uri = Uri.parse(widget.checkoutUrl);
-    final ok = await launchUrl(uri, mode: LaunchMode.externalApplication);
-    if (!mounted) return;
-    if (!ok) {
-      setState(() => _sessionExpired = true);
-      return;
-    }
-    // On web we cannot intercept return reliably; ask user to confirm.
-    await showDialog<void>(
-      context: context,
-      barrierDismissible: false,
-      builder: (ctx) => AlertDialog(
-        title: const Text('Complete payment'),
-        content: const Text(
-          'Finish payment in the browser tab, then come back and tap Done.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _finish('cancelled');
-            },
-            child: const Text('Cancel'),
-          ),
-          ElevatedButton(
-            onPressed: () {
-              Navigator.pop(ctx);
-              _finish('success');
-            },
-            child: const Text('Done'),
-          ),
-        ],
-      ),
-    );
-  }
 
   void _finish(String status) {
     if (_finished || !mounted) return;
@@ -83,20 +34,19 @@ class _ChapaCheckoutScreenState extends State<ChapaCheckoutScreen> {
   }
 
   void _handleUrl(String? url) {
-    if (url == null || url.isEmpty) return;
+    if (url == null || url.isEmpty || _finished) return;
+
+    debugPrint('Chapa WebView URL: $url');
 
     if (!PaymentConfig.isReturnUrl(url)) return;
 
     final status = PaymentConfig.statusFromReturnUrl(url);
-    if (status == 'success') {
-      _finish('success');
-      return;
-    }
+    // Prefer explicit failed; otherwise treat return as success and verify
+    // with the backend using txRef on the subscription screen.
     if (status == 'failed') {
       _finish('failed');
       return;
     }
-
     _finish('success');
   }
 
@@ -122,154 +72,105 @@ class _ChapaCheckoutScreenState extends State<ChapaCheckoutScreen> {
             onPressed: () => _finish('cancelled'),
           ),
           actions: [
-            if (!_sessionExpired && !kIsWeb)
+            if (!_sessionExpired)
               IconButton(
                 icon: const Icon(Icons.refresh),
                 tooltip: 'Reload checkout',
-                onPressed: () {
-                  _webViewController?.reload();
-                },
+                onPressed: () => _webViewController?.reload(),
               ),
           ],
         ),
-        body: kIsWeb
-            ? _WebCheckoutPlaceholder(
-                onOpenAgain: _openExternalCheckout,
-                onDone: () => _finish('success'),
-                onCancel: () => _finish('cancelled'),
-              )
-            : Stack(
-                children: [
-                  if (!_sessionExpired)
-                    InAppWebView(
-                      initialUrlRequest: URLRequest(
-                        url: WebUri(widget.checkoutUrl),
-                      ),
-                      initialSettings: InAppWebViewSettings(
-                        javaScriptEnabled: true,
-                        domStorageEnabled: true,
-                        thirdPartyCookiesEnabled: true,
-                        useShouldOverrideUrlLoading: true,
-                        mediaPlaybackRequiresUserGesture: false,
-                        allowsInlineMediaPlayback: true,
-                        supportMultipleWindows: true,
-                        javaScriptCanOpenWindowsAutomatically: true,
-                        useHybridComposition: true,
-                      ),
-                      onWebViewCreated: (controller) {
-                        _webViewController = controller;
-                      },
-                      onProgressChanged: (_, progress) {
-                        if (mounted) setState(() => _progress = progress / 100);
-                      },
-                      onLoadStart: (controller, url) {
-                        _handleUrl(url?.toString());
-                      },
-                      onLoadStop: (controller, url) {
-                        _handleUrl(url?.toString());
-                      },
-                      onUpdateVisitedHistory: (controller, url, __) {
-                        _handleUrl(url?.toString());
-                      },
-                      shouldOverrideUrlLoading: (controller, action) async {
-                        final url = action.request.url?.toString() ?? '';
-                        _handleUrl(url);
-
-                        if (url
-                            .toLowerCase()
-                            .startsWith('${PaymentConfig.returnScheme}://')) {
-                          return NavigationActionPolicy.CANCEL;
-                        }
-                        return NavigationActionPolicy.ALLOW;
-                      },
-                      onReceivedHttpError: (controller, request, errorResponse) {
-                        final code = errorResponse.statusCode;
-                        if (code == 419 || code == 410 || code == 404) {
-                          _markExpired();
-                        }
-                      },
-                      onReceivedError: (controller, request, error) {
-                        debugPrint(
-                          'Chapa WebView error: ${error.description} (${request.url})',
-                        );
-                      },
-                    ),
-                  if (_sessionExpired)
-                    _ExpiredCheckoutPanel(
-                      onRetry: () => _finish('expired'),
-                      onCancel: () => _finish('cancelled'),
-                    ),
-                  if (!_sessionExpired && _progress < 1.0)
-                    LinearProgressIndicator(
-                      value: _progress > 0 ? _progress : null,
-                      color: const Color(0xFF6B4CE6),
-                      backgroundColor: Colors.grey.shade200,
-                    ),
-                ],
-              ),
-      ),
-    );
-  }
-}
-
-class _WebCheckoutPlaceholder extends StatelessWidget {
-  const _WebCheckoutPlaceholder({
-    required this.onOpenAgain,
-    required this.onDone,
-    required this.onCancel,
-  });
-
-  final VoidCallback onOpenAgain;
-  final VoidCallback onDone;
-  final VoidCallback onCancel;
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(28),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
+        body: Stack(
           children: [
-            const Icon(Icons.open_in_browser, size: 64, color: Color(0xFF6B4CE6)),
-            const SizedBox(height: 16),
-            const Text(
-              'Checkout opened in a new tab',
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF2D3142),
-              ),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              'Complete payment there, then return and tap Done.\n\n'
-              'Test mode phone: 0900123456  ·  OTP: 12345',
-              textAlign: TextAlign.center,
-              style: TextStyle(fontSize: 15, color: Colors.grey.shade700, height: 1.4),
-            ),
-            const SizedBox(height: 24),
-            SizedBox(
-              width: double.infinity,
-              height: 52,
-              child: ElevatedButton(
-                onPressed: onDone,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF6B4CE6),
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(14),
-                  ),
+            if (!_sessionExpired)
+              InAppWebView(
+                initialUrlRequest: URLRequest(
+                  url: WebUri(widget.checkoutUrl),
                 ),
-                child: const Text(
-                  'Done — I paid',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                initialSettings: InAppWebViewSettings(
+                  javaScriptEnabled: true,
+                  domStorageEnabled: true,
+                  thirdPartyCookiesEnabled: true,
+                  useShouldOverrideUrlLoading: true,
+                  mediaPlaybackRequiresUserGesture: false,
+                  allowsInlineMediaPlayback: true,
+                  supportMultipleWindows: !kIsWeb,
+                  javaScriptCanOpenWindowsAutomatically: true,
+                  useHybridComposition: true,
+                  // Helps Chapa hosted checkout inside WebView.
+                  allowsBackForwardNavigationGestures: true,
                 ),
+                onWebViewCreated: (controller) {
+                  _webViewController = controller;
+                },
+                onProgressChanged: (_, progress) {
+                  if (mounted) setState(() => _progress = progress / 100);
+                },
+                onLoadStart: (_, url) => _handleUrl(url?.toString()),
+                onLoadStop: (_, url) => _handleUrl(url?.toString()),
+                onUpdateVisitedHistory: (_, url, __) {
+                  _handleUrl(url?.toString());
+                },
+                shouldOverrideUrlLoading: (controller, action) async {
+                  final url = action.request.url?.toString() ?? '';
+                  _handleUrl(url);
+
+                  // Deep link back into the app — close WebView instead of navigating.
+                  if (url
+                      .toLowerCase()
+                      .startsWith('${PaymentConfig.returnScheme}://')) {
+                    return NavigationActionPolicy.CANCEL;
+                  }
+
+                  // HTTPS return page — finish and stay in the Flutter app.
+                  if (PaymentConfig.isReturnUrl(url)) {
+                    return NavigationActionPolicy.CANCEL;
+                  }
+
+                  return NavigationActionPolicy.ALLOW;
+                },
+                onCreateWindow: (controller, request) async {
+                  // Open Chapa popups/windows inside the same WebView.
+                  final url = request.request.url;
+                  if (url != null) {
+                    await controller.loadUrl(urlRequest: URLRequest(url: url));
+                  }
+                  return true;
+                },
+                onReceivedHttpError: (controller, request, errorResponse) {
+                  final code = errorResponse.statusCode;
+                  final url = request.url?.toString() ?? '';
+                  // Don't treat our return page as expired.
+                  if (PaymentConfig.isReturnUrl(url)) {
+                    _handleUrl(url);
+                    return;
+                  }
+                  if (code == 419 || code == 410) {
+                    _markExpired();
+                  }
+                },
+                onReceivedError: (controller, request, error) {
+                  final url = request.url?.toString() ?? '';
+                  if (PaymentConfig.isReturnUrl(url)) {
+                    _handleUrl(url);
+                    return;
+                  }
+                  debugPrint(
+                    'Chapa WebView error: ${error.description} ($url)',
+                  );
+                },
               ),
-            ),
-            TextButton(onPressed: onOpenAgain, child: const Text('Open checkout again')),
-            TextButton(onPressed: onCancel, child: const Text('Cancel')),
+            if (_sessionExpired)
+              _ExpiredCheckoutPanel(
+                onRetry: () => _finish('expired'),
+                onCancel: () => _finish('cancelled'),
+              ),
+            if (!_sessionExpired && _progress < 1.0)
+              LinearProgressIndicator(
+                value: _progress > 0 ? _progress : null,
+                color: const Color(0xFF6B4CE6),
+                backgroundColor: Colors.grey.shade200,
+              ),
           ],
         ),
       ),
@@ -330,10 +231,7 @@ class _ExpiredCheckoutPanel extends StatelessWidget {
                 ),
               ),
             ),
-            TextButton(
-              onPressed: onCancel,
-              child: const Text('Cancel'),
-            ),
+            TextButton(onPressed: onCancel, child: const Text('Cancel')),
           ],
         ),
       ),
