@@ -7,7 +7,6 @@ export async function createBookService(data, userId, ipAddress = null) {
     createdBy: userId,
   });
 
-  // Log creation
   if (ipAddress) {
     await AuditLog.create({
       user: userId,
@@ -21,15 +20,20 @@ export async function createBookService(data, userId, ipAddress = null) {
   return book;
 }
 
-export async function getAllBooksService({ page = 1, limit = 10, search = "" } = {}) {
+export async function getAllBooksService({
+  page = 1,
+  limit = 10,
+  search = "",
+  includeHidden = false,
+} = {}) {
   const skip = (page - 1) * limit;
-  const filter = search
-    ? { title: { $regex: search, $options: "i" } }
-    : {};
+  const filter = {};
+  if (!includeHidden) filter.isVisible = true;
+  if (search) filter.title = { $regex: search, $options: "i" };
 
   const [books, total] = await Promise.all([
     Book.find(filter)
-      .select("-pages") // omit pages for list
+      .select("-pages")
       .populate("createdBy", "fullName email")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -38,22 +42,20 @@ export async function getAllBooksService({ page = 1, limit = 10, search = "" } =
   ]);
 
   return {
-    page,
+    page: Number(page),
     limit: Number(limit),
     total,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(total / limit) || 1,
     books,
   };
 }
 
-// Get book by ID
 export async function getBookByIdService(id) {
   const book = await Book.findById(id).populate("createdBy", "fullName email");
   if (!book) throw new Error("Book not found");
   return book;
 }
 
-// Update a book
 export async function updateBookService(id, data, userId = null, ipAddress = null) {
   const book = await Book.findByIdAndUpdate(id, data, { new: true });
   if (!book) throw new Error("Book not found");
@@ -71,7 +73,6 @@ export async function updateBookService(id, data, userId = null, ipAddress = nul
   return book;
 }
 
-// Delete a book
 export async function deleteBookService(id, userId = null, ipAddress = null) {
   const book = await Book.findByIdAndDelete(id);
   if (!book) throw new Error("Book not found");

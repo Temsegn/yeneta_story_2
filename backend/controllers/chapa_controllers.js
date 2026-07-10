@@ -193,7 +193,6 @@ export const chapaReturnPage = async (req, res) => {
   const deepLink = `myapp://payment-result?status=${encodeURIComponent(status)}${
     txRef ? `&tx_ref=${encodeURIComponent(txRef)}` : ""
   }`;
-  const ok = status !== "failed" && status !== "cancelled" && status !== "canceled";
 
   res.setHeader("Content-Type", "text/html; charset=utf-8");
   res.status(200).send(`<!DOCTYPE html>
@@ -201,7 +200,7 @@ export const chapaReturnPage = async (req, res) => {
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Payment ${ok ? "Complete" : "Failed"}</title>
+  <title>Payment ${status === "failed" ? "Failed" : "Complete"}</title>
   <style>
     body { font-family: system-ui, sans-serif; display:flex; min-height:100vh;
       align-items:center; justify-content:center; margin:0; background:#f7f5ff; color:#2d3142; }
@@ -211,15 +210,14 @@ export const chapaReturnPage = async (req, res) => {
       background:#6B4CE6; color:#fff; text-decoration:none; font-weight:700; }
   </style>
 </head>
-<body data-payment-return="1" data-status="${ok ? "success" : "failed"}">
+<body>
   <div class="card">
-    <h1>${ok ? "Payment complete" : "Payment failed"}</h1>
-    <p>Returning to Yeneta Story…</p>
-    <a id="open-app" href="${deepLink}">Open app</a>
+    <h1>${status === "failed" ? "Payment failed" : "Payment complete"}</h1>
+    <p>You can return to the Yeneta Story app now.</p>
+    <a href="${deepLink}">Open app</a>
   </div>
   <script>
-    // Prefer deep link for native; in-app WebView intercepts this URL / path and closes itself.
-    try { window.location.replace(${JSON.stringify(deepLink)}); } catch (e) {}
+    try { window.location.href = ${JSON.stringify(deepLink)}; } catch (e) {}
   </script>
 </body>
 </html>`);

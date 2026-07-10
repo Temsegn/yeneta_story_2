@@ -5,6 +5,7 @@ import 'package:kids_app/l10n/app_localizations.dart';
 import '../../../../core/bootstrap/bootstrap_service.dart';
 import '../../../../core/widgets/language_switcher.dart';
 import '../widgets/kids_welcome_background.dart';
+import '../widgets/kids_brand_mascot.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -164,52 +165,7 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                         },
                         child: FadeTransition(
                           opacity: _fadeAnimation,
-                          child: Stack(
-                            alignment: Alignment.center,
-                            children: [
-                              Container(
-                                width: 168,
-                                height: 168,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: Colors.white.withValues(alpha: 0.18),
-                                ),
-                              ),
-                              Container(
-                                width: 148,
-                                height: 148,
-                                decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(40),
-                                  border: Border.all(
-                                    color: Colors.white.withValues(alpha: 0.7),
-                                    width: 4,
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: Colors.black.withValues(alpha: 0.2),
-                                      blurRadius: 28,
-                                      offset: const Offset(0, 14),
-                                    ),
-                                  ],
-                                ),
-                                child: ClipRRect(
-                                  borderRadius: BorderRadius.circular(36),
-                                  child: Image.asset(
-                                    'assets/images/app_icon.png',
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (_, __, ___) => Container(
-                                      color: Colors.white,
-                                      child: const Icon(
-                                        Icons.auto_stories_rounded,
-                                        size: 72,
-                                        color: Color(0xFFFF9A56),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
+                          child: const KidsBrandMascot(size: 168, showGlow: true),
                         ),
                       ),
                       const SizedBox(height: 32),

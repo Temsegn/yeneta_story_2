@@ -1,7 +1,7 @@
 import express from "express";
 import { listLogs,createLogController } from "../controllers/auditlog_controllers.js";
 import { protect } from "../middlewares/auth_middlewares.js";
-import { isAdmin } from "../middlewares/role_middlewares.js";
+import { requireInternal } from "../middlewares/role_middlewares.js";
 import e from "express";
 const router = express.Router();
 
@@ -17,7 +17,7 @@ const router = express.Router();
  *       200:
  *         description: List of audit logs
  */
-router.get("/", protect, isAdmin, listLogs);
+router.get("/", protect, requireInternal, listLogs);
 
 /**
  * @swagger
@@ -37,5 +37,5 @@ router.get("/", protect, isAdmin, listLogs);
  *       201:
  *         description: Log created
  */
-router.post("/", protect, isAdmin, createLogController);
+router.post("/", protect, requireInternal, createLogController);
 export default router;

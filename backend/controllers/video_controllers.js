@@ -6,6 +6,7 @@ import {
   deleteVideoService,
 } from "../services/video_service.js";
 import { logAction } from "../utils/auditLogger.js";
+import { isInternalRole } from "../middlewares/role_middlewares.js";
 
 export const createVideo = async (req, res) => {
   try {
@@ -29,8 +30,17 @@ export const getAllVideos = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || "";
+    const includeHidden =
+      req.query.includeHidden === "true" &&
+      req.user &&
+      isInternalRole(req.user.role);
 
-    const videosData = await getAllVideosService({ page, limit, search });
+    const videosData = await getAllVideosService({
+      page,
+      limit,
+      search,
+      includeHidden,
+    });
     res.status(200).json(videosData);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch videos", error: error.message });

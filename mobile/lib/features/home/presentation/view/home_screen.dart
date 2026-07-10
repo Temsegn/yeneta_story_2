@@ -114,7 +114,7 @@ class HomeScreen extends ConsumerWidget {
                             child: Icon(
                               Icons.notifications_outlined,
                               size: 28,
-                              color: Colors.grey.shade800,
+                              color: Colors.white,
                             ),
                           ),
                         ),
@@ -234,8 +234,15 @@ class _HomeContent extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 32,
                         fontWeight: FontWeight.w900,
-                        color: Colors.grey.shade800,
+                        color: Colors.white,
                         height: 1.2,
+                        shadows: [
+                          Shadow(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
                     ),
                   ],
@@ -248,8 +255,15 @@ class _HomeContent extends StatelessWidget {
             style: TextStyle(
               fontSize: 40,
               fontWeight: FontWeight.w900,
-              color: AppColors.green600,
+              color: Colors.white,
               height: 1.2,
+              shadows: [
+                Shadow(
+                  color: Colors.black.withValues(alpha: 0.45),
+                  blurRadius: 8,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
           ),
           const SizedBox(height: 8),

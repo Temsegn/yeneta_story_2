@@ -36,6 +36,11 @@ const bookSchema = new mongoose.Schema(
       default: true,
       index: true
     },
+    isVisible: {
+      type: Boolean,
+      default: true,
+      index: true
+    },
     totalPages: {
       type: Number,
       default: 0

@@ -18,7 +18,6 @@ class PaymentConfig {
     final lower = url.toLowerCase();
     if (lower.startsWith('$returnScheme://')) return true;
     if (lower.contains(httpsReturnPath)) return true;
-    if (lower.contains('payments/chapa/return')) return true;
     return lower.contains('payment-result') ||
         lower.contains('payment-return') ||
         lower.contains('payment-callback');

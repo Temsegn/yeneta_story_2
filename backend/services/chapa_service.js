@@ -5,6 +5,7 @@ import Payment from "../models/payment_models.js";
 import Subscription from "../models/subscription_models.js";
 import User from "../models/user_model.js";
 import { logAction } from "../utils/auditLogger.js";
+import { toChapaPhone } from "../utils/phoneNormalizer.js";
 import {
   sendSubscriptionActivatedNotification,
   sendPaymentSuccessNotification,
@@ -14,8 +15,11 @@ const CHAPA_BASE_URL = "https://api.chapa.co/v1";
 const CHAPA_SECRET_KEY = process.env.CHAPA_SECRET_KEY;
 const CHAPA_WEBHOOK_SECRET = process.env.CHAPA_WEBHOOK_SECRET;
 
+import { getVisiblePlansMap } from "./subscription_plan_service.js";
+
 /**
  * Authoritative plan catalog — amount is NEVER taken from the client.
+ * DB visible plans override these defaults when present.
  */
 export const SUBSCRIPTION_PLANS = {
   premium_monthly: {
@@ -30,7 +34,6 @@ export const SUBSCRIPTION_PLANS = {
     price: 4999,
     durationDays: 365,
   },
-  // Legacy aliases kept for older clients.
   yearly: {
     id: "yearly",
     name: "Yearly",
@@ -44,6 +47,33 @@ export const SUBSCRIPTION_PLANS = {
     durationDays: 183,
   },
 };
+
+async function resolvePlan(planId, { visibleOnly = true } = {}) {
+  try {
+    if (visibleOnly) {
+      const visible = await getVisiblePlansMap();
+      if (Object.keys(visible).length > 0) {
+        return visible[planId] || null;
+      }
+    } else {
+      const { default: SubscriptionPlan } = await import(
+        "../models/subscription_plan_models.js"
+      );
+      const dbPlan = await SubscriptionPlan.findOne({ key: planId });
+      if (dbPlan) {
+        return {
+          id: dbPlan.key,
+          name: dbPlan.name,
+          price: dbPlan.price,
+          durationDays: dbPlan.durationInDays,
+        };
+      }
+    }
+  } catch {
+    // fall through to static catalog
+  }
+  return SUBSCRIPTION_PLANS[planId] || null;
+}
 
 function generateTxRef(userId, planId) {
   const timestamp = Date.now();
@@ -134,10 +164,10 @@ export async function checkoutSubscription(userId, planId) {
     );
   }
 
-  const plan = SUBSCRIPTION_PLANS[planId];
+  const plan = await resolvePlan(planId, { visibleOnly: true });
   if (!plan) {
     throw new Error(
-      "Invalid planId. Use 'premium_monthly' or 'premium_yearly'."
+      "Invalid or unavailable planId. Choose a visible subscription plan."
     );
   }
 
@@ -205,14 +235,31 @@ export async function checkoutSubscription(userId, planId) {
     ? configuredReturn
     : `${baseUrl}/api/v1/payments/chapa/return?status=success`;
 
-  // Do NOT send email or phone_number:
-  // - email is optional and was causing validation.email failures
-  // - prefilled phone_number forces mobile-money and hides method selection
+  const isTestMode = String(CHAPA_SECRET_KEY || "").includes("TEST");
+  // In test mode Chapa ONLY accepts official test phones — real numbers fail
+  // on "Pay with test mode". See https://developer.chapa.co/test/testing-mobile
+  const CHAPA_TEST_PHONE = "0900123456";
+  const chapaPhone = isTestMode
+    ? CHAPA_TEST_PHONE
+    : toChapaPhone(user.phoneNumber) || CHAPA_TEST_PHONE;
+
+  // Email is optional on our users; Chapa still validates email format strictly.
+  // Avoid custom domains like *.yeneta.app — Chapa returns validation.email.
+  const rawEmail = user.email && String(user.email).includes("@")
+    ? String(user.email).trim().toLowerCase().slice(0, 50)
+    : null;
+  const chapaEmail =
+    rawEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)
+      ? rawEmail
+      : `yeneta.user.${String(user._id).slice(-8)}@gmail.com`;
+
   const payload = {
     amount: plan.price.toString(),
     currency: "ETB",
+    email: chapaEmail,
     first_name: firstName.slice(0, 35),
     last_name: lastName.slice(0, 35),
+    phone_number: chapaPhone,
     tx_ref: txRef,
     callback_url: callbackUrl,
     return_url: returnUrl,
@@ -260,8 +307,7 @@ export async function checkoutSubscription(userId, planId) {
       console.error("Chapa initialize failed:", {
         status: error.response.status,
         data: error.response.data,
-        tx_ref: payload.tx_ref,
-        amount: payload.amount,
+        payload: { ...payload, email: "[redacted]" },
       });
       throw new Error(formatChapaError(error.response.data));
     }
@@ -308,7 +354,7 @@ export async function processSuccessfulPayment(txRef, chapaData) {
       resolvePlanIdFromTxRef(txRef) ||
       (await Subscription.findById(payment.subscription).session(session))?.plan;
 
-    const plan = SUBSCRIPTION_PLANS[planId];
+    const plan = await resolvePlan(planId, { visibleOnly: false });
     if (!plan) throw new Error(`Unknown plan for tx_ref: ${txRef}`);
 
     if (parseFloat(chapaData.amount) !== plan.price) {
@@ -543,6 +589,14 @@ export async function getSubscriptionMe(userId) {
     endDate: { $gt: new Date() },
   }).sort({ endDate: -1 });
 
+  const visiblePlans = await getVisiblePlansMap();
+  const planList =
+    Object.keys(visiblePlans).length > 0
+      ? Object.values(visiblePlans)
+      : Object.values(SUBSCRIPTION_PLANS).filter((p) =>
+          p.id.startsWith("premium_")
+        );
+
   return {
     isPremium: !!access.isPremium || access.accessType === "trial",
     hasAccess: access.hasAccess,
@@ -553,15 +607,13 @@ export async function getSubscriptionMe(userId) {
     requiresPayment: access.requiresPayment,
     fullName: access.fullName,
     message: access.message,
-    plans: Object.values(SUBSCRIPTION_PLANS)
-      .filter((p) => p.id.startsWith("premium_"))
-      .map((p) => ({
-        planId: p.id,
-        name: p.name,
-        price: p.price,
-        durationDays: p.durationDays,
-        currency: "ETB",
-      })),
+    plans: planList.map((p) => ({
+      planId: p.id,
+      name: p.name,
+      price: p.price,
+      durationDays: p.durationDays,
+      currency: "ETB",
+    })),
   };
 }
 

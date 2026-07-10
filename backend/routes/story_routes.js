@@ -8,8 +8,8 @@ import {
 } from "../controllers/story_controllers.js";
 import Story from "../models/story_models.js";
 import { loadContent } from '../middlewares/load_content_middlewares.js';
-import { protect } from "../middlewares/auth_middlewares.js";
-import { isAdmin } from "../middlewares/role_middlewares.js";
+import { protect, optionalProtect } from "../middlewares/auth_middlewares.js";
+import { requireRoles } from "../middlewares/role_middlewares.js";
 import { checkSubscription } from "../middlewares/subscription_middlewares.js";
 const router= express.Router();
 
@@ -49,7 +49,7 @@ const router= express.Router();
  *                 currentPage:
  *                   type: integer
  */
-router.get("/", getAllStories);
+router.get("/", optionalProtect, getAllStories);
 
 /**
  * @swagger
@@ -97,7 +97,7 @@ router.get("/:id",protect,loadContent(Story),checkSubscription,getStoryById);
  *       403:
  *         description: Admin only
  */
-router.post("/",protect, isAdmin,createStory);
+router.post("/",protect, requireRoles("admin", "content_manager"),createStory);
 
 /**
  * @swagger
@@ -125,7 +125,7 @@ router.post("/",protect, isAdmin,createStory);
  *       404:
  *         description: Story not found
  */
-router.put("/:id",protect,isAdmin, updateStory);
+router.put("/:id",protect,requireRoles("admin", "content_manager"), updateStory);
 
 /**
  * @swagger
@@ -147,6 +147,6 @@ router.put("/:id",protect,isAdmin, updateStory);
  *       404:
  *         description: Story not found
  */
-router.delete("/:id",protect,isAdmin, deleteStory);
+router.delete("/:id",protect,requireRoles("admin", "content_manager"), deleteStory);
 
 export default router;

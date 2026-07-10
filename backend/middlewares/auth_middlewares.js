@@ -34,6 +34,23 @@ export const protect = async (req, res, next) => {
   }
 };
 
+/** Attach user when a valid token is present; never fail the request. */
+export const optionalProtect = async (req, _res, next) => {
+  try {
+    let token = req.cookies.accessToken;
+    if (!token && req.headers.authorization?.startsWith("Bearer ")) {
+      token = req.headers.authorization.substring(7);
+    }
+    if (!token) return next();
+
+    const decoded = jwt.verify(token, process.env.ACCESS_TOKEN_SECRET);
+    const user = await User.findById(decoded.userId).select("-password");
+    if (user) req.user = user;
+  } catch {
+    // ignore invalid tokens for public list endpoints
+  }
+  return next();
+};
 
 export const isAdmin = (req, res, next) => {
   if (req.user.role !== "admin") {

@@ -37,10 +37,10 @@ class AppShell extends ConsumerWidget {
           Positioned.fill(
             child: _AppBackground(),
           ),
-          // Light overlay for text readability
+          // Dark overlay so foreground text stays readable
           Positioned.fill(
             child: Container(
-              color: Colors.white.withValues(alpha: 0.12),
+              color: Colors.black.withValues(alpha: 0.42),
             ),
           ),
           SafeArea(

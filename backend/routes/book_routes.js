@@ -8,8 +8,8 @@ import {
 } from "../controllers/book_controllers.js";
 import { loadContent } from "../middlewares/load_content_middlewares.js";
 import Book from "../models/book_models.js";
-import { protect } from "../middlewares/auth_middlewares.js";
-import { isAdmin } from "../middlewares/role_middlewares.js";
+import { protect, optionalProtect } from "../middlewares/auth_middlewares.js";
+import { requireRoles } from "../middlewares/role_middlewares.js";
 import { checkSubscription } from "../middlewares/subscription_middlewares.js";
 
 const router = express.Router();
@@ -50,7 +50,7 @@ const router = express.Router();
  *                 currentPage:
  *                   type: integer
  */
-router.get("/", getAllBooks);
+router.get("/", optionalProtect, getAllBooks);
 
 /**
  * @swagger
@@ -98,7 +98,7 @@ router.get("/:id", protect, loadContent(Book), checkSubscription, getBookById);
  *       403:
  *         description: Admin only
  */
-router.post("/", protect, isAdmin, createBook);
+router.post("/", protect, requireRoles("admin", "content_manager"), createBook);
 
 /**
  * @swagger
@@ -126,7 +126,7 @@ router.post("/", protect, isAdmin, createBook);
  *       404:
  *         description: Book not found
  */
-router.put("/:id", protect, isAdmin, updateBook);
+router.put("/:id", protect, requireRoles("admin", "content_manager"), updateBook);
 
 /**
  * @swagger
@@ -148,6 +148,6 @@ router.put("/:id", protect, isAdmin, updateBook);
  *       404:
  *         description: Book not found
  */
-router.delete("/:id", protect, isAdmin, deleteBook);
+router.delete("/:id", protect, requireRoles("admin", "content_manager"), deleteBook);
 
 export default router;

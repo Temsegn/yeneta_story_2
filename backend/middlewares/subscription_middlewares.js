@@ -1,8 +1,14 @@
 import { checkUserAccess } from "../services/chapa_service.js";
+import { isInternalRole } from "./role_middlewares.js";
 
 export const checkSubscription = async (req, res, next) => {
   try {
     const content = req.content;
+
+    // Yeneta staff can preview any content in admin tools.
+    if (req.user && isInternalRole(req.user.role)) {
+      return next();
+    }
 
     // Free content is always accessible (even after the trial ends).
     if (!content?.isPremium) {

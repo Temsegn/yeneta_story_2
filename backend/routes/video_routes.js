@@ -8,8 +8,8 @@ import {
 } from "../controllers/video_controllers.js";
 import Video from "../models/video_models.js";
 import { loadContent } from "../middlewares/load_content_middlewares.js";
-import { protect } from "../middlewares/auth_middlewares.js";
-import { isAdmin } from "../middlewares/role_middlewares.js";
+import { protect, optionalProtect } from "../middlewares/auth_middlewares.js";
+import { requireRoles } from "../middlewares/role_middlewares.js";
 import { checkSubscription } from "../middlewares/subscription_middlewares.js";
 
 const router = express.Router();
@@ -61,7 +61,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get("/", getAllVideos);
+router.get("/", optionalProtect, getAllVideos);
 
 /**
  * @swagger
@@ -134,7 +134,7 @@ router.get("/:id", protect, loadContent(Video), checkSubscription, getVideoById)
  *       500:
  *         description: Server error
  */
-router.post("/", protect, isAdmin, createVideo);
+router.post("/", protect, requireRoles("admin", "content_manager"), createVideo);
 /**
  * @swagger
  * /api/v1/videos/{id}:
@@ -183,7 +183,7 @@ router.post("/", protect, isAdmin, createVideo);
  *         description: Video not found
  *       500:
  *         description: Server error
- */router.put("/:id", protect, isAdmin, updateVideo);
+ */router.put("/:id", protect, requireRoles("admin", "content_manager"), updateVideo);
 
 /**
  * @swagger
@@ -208,5 +208,5 @@ router.post("/", protect, isAdmin, createVideo);
  *       500:
  *         description: Server error
  */
-router.delete("/:id", protect, isAdmin, deleteVideo);
+router.delete("/:id", protect, requireRoles("admin", "content_manager"), deleteVideo);
 export default router;

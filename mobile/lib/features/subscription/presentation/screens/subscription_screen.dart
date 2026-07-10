@@ -499,8 +499,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
                     border: Border.all(color: const Color(0xFFFFD591)),
                   ),
                   child: const Text(
-                    'Test mode: pick any payment method on Chapa. For mobile money '
-                    'use phone 0900123456 (OTP 12345 only if asked).',
+                    'Test mode: on Chapa checkout use phone 0900123456 '
+                    '(OTP 12345). Real phone numbers will fail in test mode.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 12,

@@ -7,6 +7,9 @@ node_modules/
 # Build folder
 dist/
 
+# Uploaded media
+uploads/
+
 # Lock file
 package-lock.json
 

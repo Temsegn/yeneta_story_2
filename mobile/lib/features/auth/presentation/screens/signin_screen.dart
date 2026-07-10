@@ -79,7 +79,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
 
     return AuthScreenShell(
       gradientColors: AuthBrand.signInGradient,
-      heroEmoji: '👋',
       title: l10n.welcomeBack,
       subtitle: l10n.signInSubtitle,
       formChild: Form(

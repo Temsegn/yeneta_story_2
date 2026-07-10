@@ -4,6 +4,8 @@ import User from "../models/user_model.js";
 import Video from "../models/video_models.js";
 import Story from "../models/story_models.js";
 import Book from "../models/book_models.js";
+import Education from "../models/education_models.js";
+import SubscriptionPlan from "../models/subscription_plan_models.js";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -34,7 +36,14 @@ const seedDatabase = async () => {
         email: "manager@yeneta.com",
         phoneNumber: "+251911234568",
         password: "Manager@123",
-        role: "admin",
+        role: "content_manager",
+      },
+      {
+        fullName: "Finance Officer",
+        email: "finance@yeneta.com",
+        phoneNumber: "+251911234569",
+        password: "Finance@123",
+        role: "finance",
       },
     ];
 
@@ -213,6 +222,93 @@ const seedDatabase = async () => {
     }
 
     // ============================================
+    // 5. SEED SUBSCRIPTION PLANS
+    // ============================================
+    console.log("\n💳 Seeding Subscription Plans...");
+    const samplePlans = [
+      {
+        key: "premium_monthly",
+        name: "Premium Monthly",
+        description: "Full access for 30 days",
+        price: 499,
+        durationInDays: 30,
+        isVisible: true,
+        sortOrder: 1,
+      },
+      {
+        key: "premium_yearly",
+        name: "Premium Yearly",
+        description: "Full access for 365 days",
+        price: 4999,
+        durationInDays: 365,
+        isVisible: true,
+        sortOrder: 2,
+      },
+    ];
+    for (const plan of samplePlans) {
+      const existing = await SubscriptionPlan.findOne({ key: plan.key });
+      if (!existing) {
+        await SubscriptionPlan.create(plan);
+        console.log(`✅ Created plan: ${plan.key}`);
+      } else {
+        console.log(`⚠️  Plan already exists: ${plan.key}`);
+      }
+    }
+
+    // ============================================
+    // 6. SEED EDUCATION
+    // ============================================
+    console.log("\n🎓 Seeding Education content...");
+    const sampleEducation = [
+      {
+        title: "ፊደላት ለ 3-5",
+        description: "ቀላል የፊደል ትምህርት",
+        videoUrl: "https://example.com/videos/edu-letters.mp4",
+        thumbnail:
+          "https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=800",
+        duration: "4:20",
+        author: "Yeneta",
+        ageGroup: "3-5",
+        isPremium: false,
+        isVisible: true,
+        createdBy,
+      },
+      {
+        title: "ቁጥሮች ለ 5-8",
+        description: "ቁጥር መማር በጨዋታ",
+        videoUrl: "https://example.com/videos/edu-numbers.mp4",
+        thumbnail:
+          "https://images.unsplash.com/photo-1509228468518-180dd4864904?w=800",
+        duration: "6:10",
+        author: "Yeneta",
+        ageGroup: "5-8",
+        isPremium: false,
+        isVisible: true,
+        createdBy,
+      },
+      {
+        title: "ሳይንስ ለ 8-11",
+        description: "ቀላል የሳይንስ ሙከራዎች",
+        videoUrl: "https://example.com/videos/edu-science.mp4",
+        thumbnail:
+          "https://images.unsplash.com/photo-1532094349884-543bc11b234d?w=800",
+        duration: "8:00",
+        author: "Yeneta",
+        ageGroup: "8-11",
+        isPremium: true,
+        isVisible: true,
+        createdBy,
+      },
+    ];
+    const educationCount = await Education.countDocuments();
+    if (educationCount === 0) {
+      await Education.insertMany(sampleEducation);
+      console.log(`✅ Created ${sampleEducation.length} education items`);
+    } else {
+      console.log(`⚠️  Education already exists (${educationCount})`);
+    }
+
+    // ============================================
     // SUMMARY
     // ============================================
     console.log("\n━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
@@ -222,10 +318,16 @@ const seedDatabase = async () => {
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("1. Super Admin");
     console.log("   📧 Email: admin@yeneta.com");
+    console.log("   📱 Phone: +251911234567 / 0911234567");
     console.log("   🔑 Password: Admin@123");
     console.log("\n2. Content Manager");
     console.log("   📧 Email: manager@yeneta.com");
+    console.log("   📱 Phone: +251911234568");
     console.log("   🔑 Password: Manager@123");
+    console.log("\n3. Finance Officer");
+    console.log("   📧 Email: finance@yeneta.com");
+    console.log("   📱 Phone: +251911234569");
+    console.log("   🔑 Password: Finance@123");
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━");
     console.log("\n⚠️  IMPORTANT: Change these passwords after first login!");
     console.log("\n📊 Database Statistics:");
@@ -233,6 +335,8 @@ const seedDatabase = async () => {
     console.log(`   Videos: ${await Video.countDocuments()}`);
     console.log(`   Stories: ${await Story.countDocuments()}`);
     console.log(`   Books: ${await Book.countDocuments()}`);
+    console.log(`   Education: ${await Education.countDocuments()}`);
+    console.log(`   Plans: ${await SubscriptionPlan.countDocuments()}`);
     console.log("━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━\n");
 
     await mongoose.connection.close();

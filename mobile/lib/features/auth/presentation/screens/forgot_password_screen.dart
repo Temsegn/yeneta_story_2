@@ -108,7 +108,6 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
 
     return AuthScreenShell(
       gradientColors: AuthBrand.signInGradient,
-      heroEmoji: '🔐',
       title: l10n.forgotPasswordTitle,
       subtitle: _step == 1
           ? l10n.forgotPasswordSubtitle

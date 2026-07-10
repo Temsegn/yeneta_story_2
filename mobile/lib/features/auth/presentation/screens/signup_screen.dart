@@ -108,7 +108,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
     return AuthScreenShell(
       gradientColors: AuthBrand.signUpGradient,
-      heroEmoji: '🌟',
       title: l10n.createAccountTitle,
       subtitle: l10n.createAccountSubtitle,
       showBackButton: true,

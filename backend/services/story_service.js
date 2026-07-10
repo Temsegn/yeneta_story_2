@@ -8,13 +8,20 @@ export const createStoryService = async (data, userId) => {
   return story;
 };
 
-export const getAllStoriesService = async ({ page = 1, limit = 10, ageGroup }) => {
+export const getAllStoriesService = async ({
+  page = 1,
+  limit = 10,
+  search = "",
+  includeHidden = false,
+} = {}) => {
   const skip = (page - 1) * limit;
-  const filter = ageGroup ? { ageGroup } : {};
+  const filter = {};
+  if (!includeHidden) filter.isVisible = true;
+  if (search) filter.title = { $regex: search, $options: "i" };
 
   const [stories, total] = await Promise.all([
     Story.find(filter)
-      .select("-pages") 
+      .select("-pages")
       .populate("createdBy", "fullName email")
       .sort({ createdAt: -1 })
       .skip(skip)
@@ -23,10 +30,10 @@ export const getAllStoriesService = async ({ page = 1, limit = 10, ageGroup }) =
   ]);
 
   return {
-    page,
+    page: Number(page),
     limit: Number(limit),
     total,
-    totalPages: Math.ceil(total / limit),
+    totalPages: Math.ceil(total / limit) || 1,
     stories,
   };
 };
@@ -49,5 +56,4 @@ export const updateStoryService = async (id, data) => {
 export const deleteStoryService = async (id) => {
   const story = await Story.findByIdAndDelete(id);
   if (!story) throw new Error("Story not found");
-  return;
 };

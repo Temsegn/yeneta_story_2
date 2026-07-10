@@ -52,8 +52,9 @@ const userSchema = new mongoose.Schema(
     },
     role: {
       type: String,
-      enum: ["parent", "admin"],
+      enum: ["parent", "admin", "finance", "content_manager"],
       default: "parent",
+      index: true,
     },
     childProfiles: [childProfileSchema],
     isActive: {

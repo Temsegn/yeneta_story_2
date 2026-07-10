@@ -82,6 +82,10 @@ export const loginUser = async ({ phoneNumber, password }) => {
     throw new Error("Invalid credentials");
   }
 
+  if (user.isActive === false) {
+    throw new Error("Account is deactivated. Contact Yeneta support.");
+  }
+
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new Error("Invalid credentials");

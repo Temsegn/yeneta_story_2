@@ -6,6 +6,7 @@ import {
   deleteBookService,
 } from "../services/book_service.js";
 import { logAction } from "../utils/auditLogger.js";
+import { isInternalRole } from "../middlewares/role_middlewares.js";
 
 export const createBook = async (req, res) => {
   try {
@@ -29,8 +30,17 @@ export const getAllBooks = async (req, res) => {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const search = req.query.search || "";
+    const includeHidden =
+      req.query.includeHidden === "true" &&
+      req.user &&
+      isInternalRole(req.user.role);
 
-    const books = await getAllBooksService({ page, limit, search });
+    const books = await getAllBooksService({
+      page,
+      limit,
+      search,
+      includeHidden,
+    });
     res.status(200).json(books);
   } catch (err) {
     res.status(500).json({ message: "Failed to get books", error: err.message });

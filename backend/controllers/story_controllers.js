@@ -7,6 +7,7 @@ import {
 } from "../services/story_service.js";
 import { logAction } from "../utils/auditLogger.js";
 import { validationResult } from "express-validator";
+import { isInternalRole } from "../middlewares/role_middlewares.js";
 
 export const createStory = async (req, res) => {
   try {
@@ -30,7 +31,14 @@ export const createStory = async (req, res) => {
 
 export const getAllStories = async (req, res) => {
   try {
-    const stories = await getAllStoriesService(req.query);
+    const includeHidden =
+      req.query.includeHidden === "true" &&
+      req.user &&
+      isInternalRole(req.user.role);
+    const stories = await getAllStoriesService({
+      ...req.query,
+      includeHidden,
+    });
     res.status(200).json(stories);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch stories", error: error.message });
