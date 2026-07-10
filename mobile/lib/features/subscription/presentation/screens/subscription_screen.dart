@@ -112,6 +112,7 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         }
       }
     } on ApiException catch (e) {
+      debugPrint('CHECKOUT ApiException: status=${e.statusCode} message=${e.message}');
       if (mounted) {
         if (e.statusCode == 401) {
           await AuthSession.clear(ref);
@@ -126,7 +127,8 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         }
         _showPaymentResultModal(false, e.message);
       }
-    } catch (e) {
+    } catch (e, st) {
+      debugPrint('CHECKOUT unexpected error: $e\n$st');
       if (mounted) _showPaymentResultModal(false, _getErrorMessage(e));
     } finally {
       if (mounted) setState(() => _isProcessing = false);

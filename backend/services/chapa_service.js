@@ -77,8 +77,22 @@ function splitName(fullName = "") {
 
 function formatChapaError(data) {
   if (!data) return "Chapa API error";
-  const msg = data.message ?? data.error ?? data;
-  if (typeof msg === "string") return msg;
+  let msg = data.message ?? data.error ?? data;
+
+  // Chapa sometimes returns message as a JSON string, e.g. "{\"email\":[\"validation.email\"]}"
+  if (typeof msg === "string") {
+    const trimmed = msg.trim();
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        msg = JSON.parse(trimmed);
+      } catch {
+        return msg;
+      }
+    } else {
+      return msg;
+    }
+  }
+
   if (Array.isArray(msg)) {
     return msg
       .map((item) => {
@@ -91,13 +105,21 @@ function formatChapaError(data) {
       .filter(Boolean)
       .join("; ");
   }
+
   if (typeof msg === "object") {
+    // { email: ["validation.email"] } → "email: validation.email"
+    const parts = Object.entries(msg).map(([key, value]) => {
+      const text = Array.isArray(value) ? value.join(", ") : String(value);
+      return `${key}: ${text}`;
+    });
+    if (parts.length) return parts.join("; ");
     try {
       return JSON.stringify(msg);
     } catch {
       return "Chapa API error";
     }
   }
+
   return String(msg);
 }
 
@@ -192,11 +214,15 @@ export async function checkoutSubscription(userId, planId) {
     ? CHAPA_TEST_PHONE
     : toChapaPhone(user.phoneNumber) || CHAPA_TEST_PHONE;
 
-  // Email is optional on our users; Chapa still expects a valid email when sent.
+  // Email is optional on our users; Chapa still validates email format strictly.
+  // Avoid custom domains like *.yeneta.app — Chapa returns validation.email.
+  const rawEmail = user.email && String(user.email).includes("@")
+    ? String(user.email).trim().toLowerCase().slice(0, 50)
+    : null;
   const chapaEmail =
-    user.email && String(user.email).includes("@")
-      ? String(user.email).slice(0, 50)
-      : `user${String(user._id).slice(-8)}@customers.yeneta.app`;
+    rawEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)
+      ? rawEmail
+      : `yeneta.user.${String(user._id).slice(-8)}@gmail.com`;
 
   const payload = {
     amount: plan.price.toString(),
