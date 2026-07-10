@@ -5,6 +5,7 @@ import {
   chapaWebhook,
   checkAccess,
   cleanupPendingPayments,
+  chapaReturnPage,
 } from "../controllers/chapa_controllers.js";
 import { protect } from "../middlewares/auth_middlewares.js";
 
@@ -18,30 +19,6 @@ const router = express.Router();
  *     tags: [Chapa Payments]
  *     security:
  *       - bearerAuth: []
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required:
- *               - plan
- *               - email
- *               - firstName
- *               - lastName
- *               - phoneNumber
- *             properties:
- *               plan:
- *                 type: string
- *                 enum: [yearly, semiannual]
- *               email:
- *                 type: string
- *               firstName:
- *                 type: string
- *               lastName:
- *                 type: string
- *               phoneNumber:
- *                 type: string
  */
 router.post("/init-payment", protect, initChapaPayment);
 
@@ -53,12 +30,6 @@ router.post("/init-payment", protect, initChapaPayment);
  *     tags: [Chapa Payments]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: path
- *         name: tx_ref
- *         required: true
- *         schema:
- *           type: string
  */
 router.get("/verify/:tx_ref", protect, verifyChapaPayment);
 
@@ -68,9 +39,11 @@ router.get("/verify/:tx_ref", protect, verifyChapaPayment);
  *   post:
  *     summary: Chapa webhook endpoint
  *     tags: [Chapa Payments]
- *     description: Receives payment notifications from Chapa
  */
 router.post("/webhook", chapaWebhook);
+
+/** HTTPS return page after hosted checkout (required by Chapa). */
+router.get("/return", chapaReturnPage);
 
 /**
  * @swagger

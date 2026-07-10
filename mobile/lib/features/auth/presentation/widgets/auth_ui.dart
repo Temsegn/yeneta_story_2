@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'auth_brand.dart';
+import 'kids_brand_mascot.dart';
 import 'kids_welcome_background.dart';
 
 /// Full-screen auth layout with animated gradient hero + frosted form card.
@@ -10,7 +11,6 @@ class AuthScreenShell extends StatefulWidget {
     required this.title,
     required this.subtitle,
     required this.formChild,
-    this.heroEmoji = '📚',
     this.showBackButton = false,
     this.onBack,
   });
@@ -18,7 +18,6 @@ class AuthScreenShell extends StatefulWidget {
   final List<Color> gradientColors;
   final String title;
   final String subtitle;
-  final String heroEmoji;
   final Widget formChild;
   final bool showBackButton;
   final VoidCallback? onBack;
@@ -56,45 +55,58 @@ class _AuthScreenShellState extends State<AuthScreenShell>
 
   @override
   Widget build(BuildContext context) {
-    final topInset = MediaQuery.paddingOf(context).top;
+    final media = MediaQuery.of(context);
+    final compact = media.size.height < 760;
 
     return Scaffold(
+      resizeToAvoidBottomInset: true,
       body: KidsWelcomeBackground(
         gradientColors: widget.gradientColors,
-        child: Column(
-          children: [
-            SizedBox(height: topInset + 8),
-            if (widget.showBackButton)
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Padding(
-                  padding: const EdgeInsets.only(left: 12),
-                  child: _GlassIconButton(
-                    icon: Icons.arrow_back_rounded,
-                    onPressed: widget.onBack,
+        child: SafeArea(
+          bottom: false,
+          child: Column(
+            children: [
+              if (widget.showBackButton)
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 12, top: 4),
+                    child: _GlassIconButton(
+                      icon: Icons.arrow_back_rounded,
+                      onPressed: widget.onBack,
+                    ),
+                  ),
+                ),
+              Padding(
+                padding: EdgeInsets.only(
+                  top: widget.showBackButton ? 4 : 8,
+                  bottom: compact ? 8 : 12,
+                ),
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.92, end: 1).animate(
+                    CurvedAnimation(
+                      parent: _controller,
+                      curve: Curves.elasticOut,
+                    ),
+                  ),
+                  child: _HeroHeader(
+                    title: widget.title,
+                    subtitle: widget.subtitle,
+                    compact: compact,
                   ),
                 ),
               ),
-            const SizedBox(height: 8),
-            ScaleTransition(
-              scale: Tween<double>(begin: 0.92, end: 1).animate(
-                CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+              Expanded(
+                child: FadeTransition(
+                  opacity: _fade,
+                  child: SlideTransition(
+                    position: _slide,
+                    child: _AuthFormCard(child: widget.formChild),
+                  ),
+                ),
               ),
-              child: _HeroHeader(
-                emoji: widget.heroEmoji,
-                title: widget.title,
-                subtitle: widget.subtitle,
-              ),
-            ),
-            const Spacer(),
-            FadeTransition(
-              opacity: _fade,
-              child: SlideTransition(
-                position: _slide,
-                child: _AuthFormCard(child: widget.formChild),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
@@ -103,14 +115,14 @@ class _AuthScreenShellState extends State<AuthScreenShell>
 
 class _HeroHeader extends StatelessWidget {
   const _HeroHeader({
-    required this.emoji,
     required this.title,
     required this.subtitle,
+    this.compact = false,
   });
 
-  final String emoji;
   final String title;
   final String subtitle;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
@@ -118,56 +130,18 @@ class _HeroHeader extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 28),
       child: Column(
         children: [
-          Container(
-            width: 88,
-            height: 88,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(28),
-              gradient: AuthBrand.primaryButtonGradient,
-              boxShadow: [
-                BoxShadow(
-                  color: AuthBrand.purple.withValues(alpha: 0.45),
-                  blurRadius: 24,
-                  offset: const Offset(0, 10),
-                ),
-              ],
-              border: Border.all(
-                color: Colors.white.withValues(alpha: 0.35),
-                width: 2,
-              ),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(26),
-              child: Stack(
-                fit: StackFit.expand,
-                children: [
-                  Image.asset(
-                    'assets/images/app_icon.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Center(
-                      child: Text(emoji, style: const TextStyle(fontSize: 40)),
-                    ),
-                  ),
-                  Positioned(
-                    right: 4,
-                    bottom: 4,
-                    child: Text(emoji, style: const TextStyle(fontSize: 22)),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(height: 22),
+          KidsBrandMascot(size: compact ? 84 : 108, showGlow: true),
+          SizedBox(height: compact ? 12 : 18),
           Text(
             title,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              fontSize: 30,
+            style: TextStyle(
+              fontSize: compact ? 24 : 30,
               fontWeight: FontWeight.w800,
               color: Colors.white,
               height: 1.15,
               letterSpacing: -0.5,
-              shadows: [
+              shadows: const [
                 Shadow(
                   color: Color(0x33000000),
                   blurRadius: 8,
@@ -176,13 +150,15 @@ class _HeroHeader extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 10),
+          const SizedBox(height: 8),
           Text(
             subtitle,
             textAlign: TextAlign.center,
+            maxLines: compact ? 2 : 3,
+            overflow: TextOverflow.ellipsis,
             style: TextStyle(
-              fontSize: 15,
-              height: 1.4,
+              fontSize: compact ? 13 : 15,
+              height: 1.35,
               color: Colors.white.withValues(alpha: 0.92),
               fontWeight: FontWeight.w500,
             ),
@@ -201,12 +177,10 @@ class _AuthFormCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.paddingOf(context).bottom;
+    final keyboard = MediaQuery.viewInsetsOf(context).bottom;
 
     return Container(
       width: double.infinity,
-      constraints: BoxConstraints(
-        maxHeight: MediaQuery.sizeOf(context).height * 0.72,
-      ),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
@@ -222,7 +196,13 @@ class _AuthFormCard extends StatelessWidget {
         borderRadius: const BorderRadius.vertical(top: Radius.circular(32)),
         child: SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
-          padding: EdgeInsets.fromLTRB(24, 28, 24, 20 + bottomInset),
+          keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
+          padding: EdgeInsets.fromLTRB(
+            24,
+            24,
+            24,
+            20 + bottomInset + keyboard,
+          ),
           child: child,
         ),
       ),

@@ -32,6 +32,17 @@ export function normalizeEthiopianPhone(input) {
 }
 
 /**
+ * Chapa requires 10-digit local format: 09XXXXXXXX (not +251…).
+ * @param {string} input
+ * @returns {string|null}
+ */
+export function toChapaPhone(input) {
+  const e164 = normalizeEthiopianPhone(input);
+  if (!e164) return null;
+  return `0${e164.slice(4)}`; // +2519… → 09…
+}
+
+/**
  * @param {string} input
  * @returns {boolean}
  */

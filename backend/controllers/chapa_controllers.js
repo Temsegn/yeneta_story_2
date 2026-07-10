@@ -181,3 +181,45 @@ export const cleanupPendingPayments = async (req, res) => {
     });
   }
 };
+
+/**
+ * Browser return page after Chapa checkout.
+ * GET /api/v1/payments/chapa/return
+ * Used as https return_url (custom schemes break Chapa's hosted page).
+ */
+export const chapaReturnPage = async (req, res) => {
+  const status = String(req.query.status || "success").toLowerCase();
+  const txRef = req.query.tx_ref || req.query.trx_ref || "";
+  const deepLink = `myapp://payment-result?status=${encodeURIComponent(status)}${
+    txRef ? `&tx_ref=${encodeURIComponent(txRef)}` : ""
+  }`;
+
+  res.setHeader("Content-Type", "text/html; charset=utf-8");
+  res.status(200).send(`<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Payment ${status === "failed" ? "Failed" : "Complete"}</title>
+  <style>
+    body { font-family: system-ui, sans-serif; display:flex; min-height:100vh;
+      align-items:center; justify-content:center; margin:0; background:#f7f5ff; color:#2d3142; }
+    .card { background:#fff; padding:28px; border-radius:20px; max-width:420px;
+      box-shadow:0 12px 40px rgba(107,76,230,.15); text-align:center; }
+    a { display:inline-block; margin-top:16px; padding:12px 20px; border-radius:12px;
+      background:#6B4CE6; color:#fff; text-decoration:none; font-weight:700; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>${status === "failed" ? "Payment failed" : "Payment complete"}</h1>
+    <p>You can return to the Yeneta Story app now.</p>
+    <a href="${deepLink}">Open app</a>
+  </div>
+  <script>
+    try { window.location.href = ${JSON.stringify(deepLink)}; } catch (e) {}
+  </script>
+</body>
+</html>`);
+};
+

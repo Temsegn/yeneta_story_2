@@ -5,6 +5,7 @@ import Payment from "../models/payment_models.js";
 import Subscription from "../models/subscription_models.js";
 import User from "../models/user_model.js";
 import { logAction } from "../utils/auditLogger.js";
+import { toChapaPhone } from "../utils/phoneNormalizer.js";
 import {
   sendSubscriptionActivatedNotification,
   sendPaymentSuccessNotification,
@@ -146,13 +147,30 @@ export async function checkoutSubscription(userId, planId) {
   });
 
   const { firstName, lastName } = splitName(user.fullName);
+  const baseUrl = (
+    process.env.CLIENT_URL || "https://yeneta-zq3w.onrender.com"
+  ).replace(/\/$/, "");
   const callbackUrl =
     process.env.CHAPA_CALLBACK_URL ||
-    `${process.env.CLIENT_URL || "https://yeneta-zq3w.onrender.com"}/api/v1/payments/chapa/webhook`;
+    `${baseUrl}/api/v1/payments/chapa/webhook`;
+
+  // Chapa requires an https return_url. Custom schemes (myapp://) break the
+  // hosted checkout page (often surfaces as a generic 419 error).
   const returnUrl =
-    process.env.CHAPA_RETURN_URL ||
-    process.env.FRONTEND_URL ||
-    "myapp://payment-result?status=success";
+    process.env.CHAPA_RETURN_URL?.startsWith("http")
+      ? process.env.CHAPA_RETURN_URL
+      : `${baseUrl}/api/v1/payments/chapa/return?status=success`;
+
+  const chapaPhone =
+    toChapaPhone(user.phoneNumber) ||
+    toChapaPhone("0912345678") ||
+    "0912345678";
+
+  // Email is optional on our users; Chapa still expects a valid email when sent.
+  const chapaEmail =
+    user.email && String(user.email).includes("@")
+      ? String(user.email).slice(0, 50)
+      : `user${String(user._id).slice(-8)}@customers.yeneta.app`;
 
   try {
     const response = await axios.post(
@@ -160,16 +178,16 @@ export async function checkoutSubscription(userId, planId) {
       {
         amount: plan.price.toString(),
         currency: "ETB",
-        email: user.email,
-        first_name: firstName,
-        last_name: lastName,
-        phone_number: user.phoneNumber || "0900000000",
+        email: chapaEmail,
+        first_name: firstName.slice(0, 35),
+        last_name: lastName.slice(0, 35),
+        phone_number: chapaPhone,
         tx_ref: txRef,
         callback_url: callbackUrl,
         return_url: returnUrl,
         customization: {
           title: plan.name.slice(0, 16),
-          description: `Subscribe for ${plan.durationDays} days`,
+          description: `Subscribe for ${plan.durationDays} days`.slice(0, 50),
         },
       },
       {
