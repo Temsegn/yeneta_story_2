@@ -5,7 +5,6 @@ import Payment from "../models/payment_models.js";
 import Subscription from "../models/subscription_models.js";
 import User from "../models/user_model.js";
 import { logAction } from "../utils/auditLogger.js";
-import { toChapaPhone } from "../utils/phoneNormalizer.js";
 import {
   sendSubscriptionActivatedNotification,
   sendPaymentSuccessNotification,
@@ -206,31 +205,14 @@ export async function checkoutSubscription(userId, planId) {
     ? configuredReturn
     : `${baseUrl}/api/v1/payments/chapa/return?status=success`;
 
-  const isTestMode = String(CHAPA_SECRET_KEY || "").includes("TEST");
-  // In test mode Chapa ONLY accepts official test phones — real numbers fail
-  // on "Pay with test mode". See https://developer.chapa.co/test/testing-mobile
-  const CHAPA_TEST_PHONE = "0900123456";
-  const chapaPhone = isTestMode
-    ? CHAPA_TEST_PHONE
-    : toChapaPhone(user.phoneNumber) || CHAPA_TEST_PHONE;
-
-  // Email is optional on our users; Chapa still validates email format strictly.
-  // Avoid custom domains like *.yeneta.app — Chapa returns validation.email.
-  const rawEmail = user.email && String(user.email).includes("@")
-    ? String(user.email).trim().toLowerCase().slice(0, 50)
-    : null;
-  const chapaEmail =
-    rawEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)
-      ? rawEmail
-      : `yeneta.user.${String(user._id).slice(-8)}@gmail.com`;
-
+  // Do NOT send email or phone_number:
+  // - email is optional and was causing validation.email failures
+  // - prefilled phone_number forces mobile-money and hides method selection
   const payload = {
     amount: plan.price.toString(),
     currency: "ETB",
-    email: chapaEmail,
     first_name: firstName.slice(0, 35),
     last_name: lastName.slice(0, 35),
-    phone_number: chapaPhone,
     tx_ref: txRef,
     callback_url: callbackUrl,
     return_url: returnUrl,
@@ -278,7 +260,8 @@ export async function checkoutSubscription(userId, planId) {
       console.error("Chapa initialize failed:", {
         status: error.response.status,
         data: error.response.data,
-        payload: { ...payload, email: "[redacted]" },
+        tx_ref: payload.tx_ref,
+        amount: payload.amount,
       });
       throw new Error(formatChapaError(error.response.data));
     }
