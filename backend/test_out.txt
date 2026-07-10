@@ -1,0 +1,651 @@
+
+> backend@1.0.0 test
+> cross-env NODE_OPTIONS=--experimental-vm-modules NODE_ENV=test jest --verbose
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: 🔄 add secrets lifecycle management: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: 👥 sync secrets across teammates & machines: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+(node:12868) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:7348) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+(node:16252) ExperimentalWarning: VM Modules is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:21:58.227Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:21:58.716Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:21:58.730Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:12868) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:00.279Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:16252) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/subscriptions/register at 2026-04-17T08:22:00.460Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:7348) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/subscriptions/register at 2026-04-17T08:22:00.495Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    auth_middleware: No access token found in cookies or headers
+
+      at protect (middlewares/auth_middlewares.js:18:15)
+
+  console.log
+    GET /api/v1/subscriptions/me at 2026-04-17T08:22:00.508Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/subscriptions/me at 2026-04-17T08:22:00.537Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    auth_middleware: No access token found in cookies or headers
+
+      at protect (middlewares/auth_middlewares.js:18:15)
+
+  console.log
+    GET /api/v1/subscriptions/check at 2026-04-17T08:22:00.548Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:00.931Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:00.936Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:01.111Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:01.112Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:7348) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+(node:16252) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:02.860Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/books at 2026-04-17T08:22:03.055Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/books at 2026-04-17T08:22:03.207Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/books at 2026-04-17T08:22:03.223Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/books at 2026-04-17T08:22:03.289Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    auth_middleware: No access token found in cookies or headers
+
+      at protect (middlewares/auth_middlewares.js:18:15)
+
+  console.log
+    GET /api/v1/books/69e1edabafd6902da137c41b at 2026-04-17T08:22:03.392Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    PUT /api/v1/books/69e1edabafd6902da137c41b at 2026-04-17T08:22:03.418Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:7348) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:03.626Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    PUT /api/v1/books/69e1edabafd6902da137c41b at 2026-04-17T08:22:03.636Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    DELETE /api/v1/books/69e1edabafd6902da137c41b at 2026-04-17T08:22:03.649Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/videos at 2026-04-17T08:22:03.792Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/videos at 2026-04-17T08:22:03.823Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/videos at 2026-04-17T08:22:03.838Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/videos/69e1edab62cc087503bb6ed8 at 2026-04-17T08:22:03.891Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    PUT /api/v1/videos/69e1edab62cc087503bb6ed8 at 2026-04-17T08:22:03.917Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:16252) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    PUT /api/v1/videos/69e1edab62cc087503bb6ed8 at 2026-04-17T08:22:03.940Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    DELETE /api/v1/videos/69e1edab62cc087503bb6ed8 at 2026-04-17T08:22:03.951Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+FAIL tests/subscriptions.test.js (18.454 s)
+  Subscriptions API Endpoints
+    POST /register
+      × should allow a user to create a subscription (51 ms)
+      √ should return 401 if not authenticated (12 ms)
+    GET /me
+      √ should get user's subscription if authenticated (25 ms)
+      √ should return 401 if not authenticated (14 ms)
+    GET /check
+      √ should check subscription status if authenticated (19 ms)
+
+  ● Subscriptions API Endpoints › POST /register › should allow a user to create a subscription
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 201
+    Received: 400
+
+    [0m [90m 25 |[39m         [33m.[39msend({ plan[33m:[39m [32m"monthly"[39m[33m,[39m durationInDays[33m:[39m [35m30[39m })[33m;[39m
+     [90m 26 |[39m
+    [31m[1m>[22m[39m[90m 27 |[39m       expect(res[33m.[39mstatus)[33m.[39mtoBe([35m201[39m)[33m;[39m
+     [90m    |[39m                          [31m[1m^[22m[39m
+     [90m 28 |[39m       expect(res[33m.[39mbody)[33m.[39mtoHaveProperty([32m"plan"[39m[33m,[39m [32m"monthly"[39m)[33m;[39m
+     [90m 29 |[39m     })[33m;[39m
+     [90m 30 |[39m[0m
+
+      at Object.<anonymous> (tests/subscriptions.test.js:27:26)
+
+PASS tests/books.test.js (19.205 s)
+  Books API Endpoints
+    POST /
+      √ should allow admin to create a book (168 ms)
+      √ should deny normal user from creating a book (15 ms)
+    GET /
+      √ should get all books for authenticated user (61 ms)
+      √ should deny access if no token is provided (23 ms)
+    Operations on specific book /:id
+      √ should allow user to get non-premium book (23 ms)
+      √ should allow admin to update a book (218 ms)
+      √ should deny normal user from updating a book (14 ms)
+      √ should allow admin to delete a book (23 ms)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: ⚙️  load multiple .env files with { path: ['.env.local', '.env'] }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+PASS tests/videos.test.js (23.127 s)
+  Videos API Endpoints
+    POST /
+      √ should allow admin to create a video (35 ms)
+      √ should deny normal user from creating a video (20 ms)
+    GET /
+      √ should get all videos for authenticated user (48 ms)
+    Operations on specific video /:id
+      √ should allow user to get non-premium video (21 ms)
+      √ should allow admin to update a video (24 ms)
+      √ should deny normal user from updating a video (12 ms)
+      √ should allow admin to delete a video (26 ms)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:12.359Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:12.599Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:7348) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:15.153Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:15.303Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:12868) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:16.459Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:16.547Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/subscriptions/register at 2026-04-17T08:22:16.712Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/payments at 2026-04-17T08:22:16.732Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.error
+    Error: amount, paymentMethod, and plan are required
+        at createPaymentService (C:\Users\KassT\Desktop\projects\yeneta\backend\services\payment_service.js:10:49)
+        at createPaymentService (C:\Users\KassT\Desktop\projects\yeneta\backend\controllers\payment_controllers.js:5:26)
+        at Layer.handleRequest (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\router\lib\route.js:157:13)
+        at protect (C:\Users\KassT\Desktop\projects\yeneta\backend\middlewares\auth_middlewares.js:30:5)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+    [0m [90m 11 |[39m     })[33m;[39m
+     [90m 12 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 13 |[39m     console[33m.[39merror(error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 14 |[39m     res[33m.[39mstatus([35m400[39m)[33m.[39mjson({
+     [90m 15 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Payment creation failed"[39m[33m,[39m
+     [90m 16 |[39m     })[33m;[39m[0m
+
+      at error (controllers/payment_controllers.js:13:13)
+
+  console.log
+    POST /api/v1/payments at 2026-04-17T08:22:16.774Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    auth_middleware: No access token found in cookies or headers
+
+      at protect (middlewares/auth_middlewares.js:18:15)
+
+  console.log
+    POST /api/v1/payments/verify at 2026-04-17T08:22:16.787Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.error
+    Error: transactionId is required
+        at verifyPayment (C:\Users\KassT\Desktop\projects\yeneta\backend\controllers\payment_controllers.js:24:31)
+        at Layer.handleRequest (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\router\lib\layer.js:152:17)
+        at next (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\router\lib\route.js:157:13)
+        at protect (C:\Users\KassT\Desktop\projects\yeneta\backend\middlewares\auth_middlewares.js:30:5)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+
+    [0m [90m 27 |[39m     res[33m.[39mstatus([35m200[39m)[33m.[39mjson(result)[33m;[39m
+     [90m 28 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror(error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 30 |[39m     res[33m.[39mstatus([35m500[39m)[33m.[39mjson({
+     [90m 31 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Payment verification failed"[39m[33m,[39m
+     [90m 32 |[39m     })[33m;[39m[0m
+
+      at error (controllers/payment_controllers.js:29:13)
+      at Layer.handleRequest (node_modules/router/lib/layer.js:152:17)
+      at next (node_modules/router/lib/route.js:157:13)
+      at protect (middlewares/auth_middlewares.js:30:5)
+
+  console.log
+    POST /api/v1/payments/verify at 2026-04-17T08:22:16.800Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.error
+    MongoServerError: Transaction numbers are only allowed on a replica set member or mongos
+        at Connection.sendCommand (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\cmap\connection.ts:557:17)
+        at processTicksAndRejections (node:internal/process/task_queues:103:5)
+        at Connection.command (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\cmap\connection.ts:627:22)
+        at Server.command (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\sdam\server.ts:350:21)
+        at tryOperation (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\operations\execute_operation.ts:293:24)
+        at executeOperation (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\operations\execute_operation.ts:123:12)
+        at FindCursor._initialize (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\cursor\find_cursor.ts:92:22)
+        at FindCursor.cursorInit (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\cursor\abstract_cursor.ts:917:21)
+        at FindCursor.fetchBatch (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\cursor\abstract_cursor.ts:955:7)
+        at FindCursor.next (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\cursor\abstract_cursor.ts:573:9)
+        at Collection.findOne (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongodb\src\collection.ts:552:20)
+        at model.Query._findOne (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongoose\lib\query.js:2731:15)
+        at model.Query.exec (C:\Users\KassT\Desktop\projects\yeneta\backend\node_modules\mongoose\lib\query.js:4687:63)
+        at verifyPaymentService (C:\Users\KassT\Desktop\projects\yeneta\backend\services\payment_service.js:76:21)
+        at verifyPayment (C:\Users\KassT\Desktop\projects\yeneta\backend\controllers\payment_controllers.js:26:20) {
+      errorLabelSet: Set(0) {},
+      errorResponse: {
+        ok: 0,
+        errmsg: 'Transaction numbers are only allowed on a replica set member or mongos',
+        code: 20,
+        codeName: 'IllegalOperation'
+      },
+      ok: 0,
+      code: 20,
+      codeName: 'IllegalOperation'
+    }
+
+    [0m [90m 27 |[39m     res[33m.[39mstatus([35m200[39m)[33m.[39mjson(result)[33m;[39m
+     [90m 28 |[39m   } [36mcatch[39m (error) {
+    [31m[1m>[22m[39m[90m 29 |[39m     console[33m.[39merror(error)[33m;[39m
+     [90m    |[39m             [31m[1m^[22m[39m
+     [90m 30 |[39m     res[33m.[39mstatus([35m500[39m)[33m.[39mjson({
+     [90m 31 |[39m       message[33m:[39m error[33m.[39mmessage [33m||[39m [32m"Payment verification failed"[39m[33m,[39m
+     [90m 32 |[39m     })[33m;[39m[0m
+
+      at error (controllers/payment_controllers.js:29:13)
+
+(node:7348) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:17.554Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/stories at 2026-04-17T08:22:17.718Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/stories at 2026-04-17T08:22:17.834Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/stories at 2026-04-17T08:22:17.851Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/stories/69e1edb9cb5795e1489b2373 at 2026-04-17T08:22:18.484Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    PUT /api/v1/stories/69e1edb9cb5795e1489b2373 at 2026-04-17T08:22:18.509Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+(node:7348) [MONGOOSE] Warning: mongoose: the `new` option for `findOneAndUpdate()` and `findOneAndReplace()` is deprecated. Use `returnDocument: 'after'` instead.
+  console.log
+    DELETE /api/v1/stories/69e1edb9cb5795e1489b2373 at 2026-04-17T08:22:18.690Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:19.076Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+PASS tests/payments.test.js (16.434 s)
+  Payments API Endpoints
+    POST /
+      √ should create a payment for authenticated user (62 ms)
+      √ should return 401 if not authenticated (7 ms)
+    POST /verify
+      √ should return error if transactionId missing (16 ms)
+      √ should attempt verification with a transactionId (73 ms)
+
+PASS tests/stories.test.js (16.479 s)
+  Stories API Endpoints
+    POST /
+      √ should allow admin to create a story (118 ms)
+      √ should deny normal user from creating a story (17 ms)
+    GET /
+      √ should get all stories for authenticated user (48 ms)
+    Operations on specific story /:id
+      √ should allow user to get non-premium story (30 ms)
+      √ should allow admin to update a story (181 ms)
+      √ should allow admin to delete a story (65 ms)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:22.357Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:23.539Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:23.751Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: 🔐 prevent committing .env to code: https://dotenvx.com/precommit
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: ⚙️  specify custom .env file path with { path: '/custom/path/.env' }
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:25.374Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:25.578Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+PASS tests/auth.test.js (16.617 s)
+  Auth Endpoints
+    POST /register
+      √ should register a new user successfully (2635 ms)
+      √ should fail if email is already registered (3294 ms)
+      √ should fail validation if missing fields (1181 ms)
+    POST /login
+      √ should login with correct credentials & return a token (1835 ms)
+      √ should fail with incorrect password (361 ms)
+
+  console.log
+    [dotenv@17.2.4] injecting env (14) from .env -- tip: 🗂️ backup and recover secrets: https://dotenvx.com/ops
+
+      at _log (node_modules/dotenv/lib/main.js:142:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:29.822Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:30.219Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:31.959Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:31.986Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:31.997Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:32.002Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:32.013Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/register at 2026-04-17T08:22:32.191Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/auth/profile at 2026-04-17T08:22:32.204Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    POST /api/v1/auth/login at 2026-04-17T08:22:32.208Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /api/v1/auth/profile at 2026-04-17T08:22:32.237Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    auth_middleware: No access token found in cookies or headers
+
+      at protect (middlewares/auth_middlewares.js:18:15)
+
+  console.log
+    GET /health at 2026-04-17T08:22:34.303Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+  console.log
+    GET /non-existent-route at 2026-04-17T08:22:34.338Z
+
+      at logger (middlewares/logger_middlewares.js:2:11)
+
+PASS tests/health.test.js (12.909 s)
+  Health Check API
+    √ should return 200 and status ok (45 ms)
+    √ should return 404 for non-existent routes (14 ms)
+
+PASS tests/auth.integration.test.js (17.191 s)
+  Auth Integration Tests
+    POST /api/v1/auth/register
+      √ should register a new user successfully (1762 ms)
+      √ should fail if email already exists (38 ms)
+    POST /api/v1/auth/login
+      √ should login successfully with correct credentials (193 ms)
+      √ should fail with incorrect password (206 ms)
+
+PASS tests/api.test.js (19.362 s)
+  Protected API Endpoints
+    GET /auth/profile
+      √ should access profile if authenticated (40 ms)
+      √ should deny access if unauthorized (9 ms)
+
+------------------------------|---------|----------|---------|---------|---------------------------
+File                          | % Stmts | % Branch | % Funcs | % Lines | Uncovered Line #s         
+------------------------------|---------|----------|---------|---------|---------------------------
+All files                     |   66.74 |    47.94 |   85.24 |   70.23 |                           
+ controllers                  |   71.34 |    69.23 |   82.14 |      72 |                           
+  auditlog_controllers.js     |       0 |        0 |       0 |       0 | 3-36                      
+  auth_controllers.js         |    57.5 |      100 |      50 |    57.5 | 90-96,101-114,123,128-150 
+  book_controllers.js         |   83.87 |      100 |     100 |   83.87 | 23,36,45,62,79            
+  payment_controllers.js      |   86.66 |    66.66 |     100 |   85.71 | 7,27                      
+  story_controllers.js        |   79.41 |       50 |     100 |   84.37 | 27,36,45,65,82            
+  subscription_controllers.js |      80 |      100 |     100 |      80 | 10,21,32                  
+  video_controllers.js        |   83.87 |      100 |     100 |   83.87 | 23,36,45,62,79            
+ models                       |     100 |       50 |     100 |     100 |                           
+  auditlog_models.js          |     100 |      100 |     100 |     100 |                           
+  book_models.js              |     100 |      100 |     100 |     100 |                           
+  payment_models.js           |     100 |      100 |     100 |     100 |                           
+  story_models.js             |     100 |       50 |     100 |     100 | 54                        
+  subscription_models.js      |     100 |      100 |     100 |     100 |                           
+  user_model.js               |     100 |      100 |     100 |     100 |                           
+  video_models.js             |     100 |      100 |     100 |     100 |                           
+ services                     |   57.43 |    43.22 |   85.18 |   63.42 |                           
+  auditlog_service.js         |       0 |        0 |       0 |       0 | 3-25                      
+  auth_service.js             |   60.46 |    53.33 |      60 |      65 | 8,34,39,54-64,74-83       
+  book_service.js             |      75 |    51.85 |     100 |   85.71 | 12,62,80                  
+  payment_service.js          |    20.4 |    18.18 |     100 |   20.45 | 11-67,77-104              
+  story_service.js            |   86.95 |       60 |     100 |     100 | 13-51                     
+  subscription_service.js     |   81.81 |       70 |     100 |   81.81 | 11,38,46,57               
+  video_service.js            |   86.95 |    36.36 |     100 |     100 | 12-59                     
+ utils                        |    87.5 |      100 |     100 |    87.5 |                           
+  auditLogger.js              |      75 |      100 |     100 |      75 | 22                        
+  generateToken.js            |     100 |      100 |     100 |     100 |                           
+------------------------------|---------|----------|---------|---------|---------------------------
+Jest: "global" coverage threshold for statements (80%) not met: 66.74%
+Jest: "global" coverage threshold for branches (80%) not met: 47.94%
+Jest: "global" coverage threshold for lines (80%) not met: 70.23%
+Test Suites: 1 failed, 8 passed, 9 total
+Tests:       1 failed, 42 passed, 43 total
+Snapshots:   0 total
+Time:        55.455 s, estimated 57 s
+Ran all test suites.

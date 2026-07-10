@@ -1,0 +1,18 @@
+# Node modules
+node_modules/
+
+# Environment variables
+.env
+
+# Build folder
+dist/
+
+# Lock file
+package-lock.json
+
+# Test coverage
+coverage/
+
+# Optional: OS or editor files
+.DS_Store
+.vscode/

@@ -1,0 +1,15 @@
+# Documentation files (except README.md)
+*.md
+!README.md
+!**/README.md
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~

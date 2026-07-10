@@ -1,0 +1,81 @@
+{
+  "@@locale": "en",
+  "appTitle": "Yeneta Story",
+  "welcomeBack": "Welcome Back!",
+  "signInSubtitle": "Sign in to continue your learning journey",
+  "email": "Email",
+  "emailHint": "Enter your email",
+  "password": "Password",
+  "passwordHint": "Enter your password",
+  "signIn": "Sign In",
+  "signUp": "Sign Up",
+  "noAccount": "Don't have an account?",
+  "browseAsGuest": "Browse as Guest",
+  "guestModeHint": "Explore free content without an account",
+  "skip": "Skip",
+  "next": "Next",
+  "getStarted": "Get Started",
+  "homeGreeting": "Welcome,",
+  "guestName": "Guest",
+  "exploreSubtitle": "Explore the forest ❤",
+  "watchAndLearn": "Watch & Learn",
+  "videosCount": "{count} videos",
+  "@videosCount": {
+    "placeholders": {
+      "count": { "type": "int" }
+    }
+  },
+  "subscribeNow": "Subscribe Now",
+  "trialBanner": "Your free trial ends in {days} days. Subscribe to keep premium access!",
+  "@trialBanner": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "paymentRequiredBanner": "Your free trial has ended. Subscribe to unlock premium stories, books & videos!",
+  "guestPaymentBanner": "Create an account to start your 5-day free trial and unlock all content!",
+  "createAccountToContinue": "Create an account to continue",
+  "loginToPay": "Please sign in or create an account to subscribe and pay.",
+  "loginToAccessProfile": "Please sign in to access your profile and settings.",
+  "cancel": "Cancel",
+  "loginOrRegister": "Sign In / Register",
+  "profile": "Profile",
+  "logout": "Logout",
+  "logoutConfirm": "Are you sure you want to logout?",
+  "language": "Language",
+  "english": "English",
+  "amharic": "Amharic",
+  "bootstrapLoading": "Loading Yeneta Story...",
+  "bootstrapCheckingVersion": "Checking app version...",
+  "bootstrapCheckingAuth": "Checking login session...",
+  "bootstrapCheckingPayment": "Checking subscription status...",
+  "bootstrapReady": "Ready!",
+  "updateRequiredTitle": "Update Required",
+  "updateRequiredMessage": "A new version of Yeneta Story is available. Please update to continue.",
+  "updateNow": "Update Now",
+  "continueAsGuest": "Continue without account",
+  "onboardingTitle1": "Read Stories",
+  "onboardingDesc1": "Discover amazing stories and adventures that spark imagination",
+  "onboardingTitle2": "Watch Videos",
+  "onboardingDesc2": "Watch educational videos designed for young learners",
+  "onboardingTitle3": "Play Games",
+  "onboardingDesc3": "Learn through fun and interactive games",
+  "subscribe": "Subscribe",
+  "freeTrialActive": "Free Trial Active",
+  "subscriptionActive": "Subscription Active",
+  "daysRemaining": "{days} days remaining",
+  "@daysRemaining": {
+    "placeholders": {
+      "days": { "type": "int" }
+    }
+  },
+  "retry": "Retry",
+  "unableToLoad": "Unable to load videos",
+  "checkConnection": "Please check your connection",
+  "premium": "Premium",
+  "premiumLockedTitle": "Premium content",
+  "premiumLockedGuestMessage": "This content is premium. Create an account to start your free trial, or subscribe after it ends.",
+  "premiumLockedPayMessage": "This content is locked. Choose a plan to unlock premium videos, books, and education.",
+  "viewPlans": "View Plans",
+  "freeLabel": "Free"
+}

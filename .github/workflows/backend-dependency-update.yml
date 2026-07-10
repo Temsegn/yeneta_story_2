@@ -1,0 +1,69 @@
+name: Backend Dependency Update
+
+on:
+  schedule:
+    # Run every Monday at 9 AM UTC
+    - cron: '0 9 * * 1'
+  workflow_dispatch: # Allow manual trigger
+
+jobs:
+  update-dependencies:
+    name: Check for Dependency Updates
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Check for outdated packages
+      working-directory: ./backend
+      run: |
+        echo "📦 Checking for outdated packages..."
+        npm outdated || true
+        
+    - name: Run npm audit
+      working-directory: ./backend
+      run: |
+        echo "🔒 Running security audit..."
+        npm audit --audit-level=moderate || true
+
+    - name: Create issue if vulnerabilities found
+      if: failure()
+      uses: actions/github-script@v7
+      with:
+        script: |
+          const title = '🔒 Security vulnerabilities detected in backend dependencies';
+          const body = `## Security Alert
+          
+          Automated dependency scan has detected security vulnerabilities in backend dependencies.
+          
+          ### Action Required
+          1. Review the vulnerabilities by running \`npm audit\` in the backend directory
+          2. Update affected packages using \`npm audit fix\`
+          3. Test the application after updates
+          4. Create a PR with the fixes
+          
+          ### Commands
+          \`\`\`bash
+          cd backend
+          npm audit
+          npm audit fix
+          npm test
+          \`\`\`
+          
+          *This issue was automatically created by the dependency update workflow.*`;
+          
+          github.rest.issues.create({
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            title: title,
+            body: body,
+            labels: ['security', 'dependencies', 'backend']
+          });

@@ -1,0 +1,226 @@
+name: Backend CI/CD Pipeline
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [ "main", "develop" ]
+    paths:
+      - 'backend/**'
+      - '.github/workflows/backend-ci.yml'
+
+env:
+  NODE_VERSION: '20.x'
+
+jobs:
+  lint:
+    name: Lint Code
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Run ESLint
+      working-directory: ./backend
+      run: npm run lint
+
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ matrix.node-version }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Run tests with coverage
+      working-directory: ./backend
+      run: npm run test:coverage
+      env:
+        NODE_ENV: test
+        ACCESS_TOKEN_SECRET: test_access_token_secret
+        REFRESH_TOKEN_SECRET: test_refresh_token_secret
+
+    - name: Upload coverage to Codecov
+      if: matrix.node-version == '20.x'
+      uses: codecov/codecov-action@v4
+      with:
+        files: ./backend/coverage/lcov.info
+        flags: backend
+        name: backend-coverage
+        fail_ci_if_error: false
+        token: ${{ secrets.CODECOV_TOKEN }}
+
+    - name: Archive coverage report
+      if: matrix.node-version == '20.x'
+      uses: actions/upload-artifact@v4
+      with:
+        name: coverage-report
+        path: backend/coverage/
+        retention-days: 7
+
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci
+
+    - name: Run npm audit
+      working-directory: ./backend
+      run: npm audit --audit-level=moderate
+      continue-on-error: true
+
+    - name: Run Snyk security scan
+      uses: snyk/actions/node@master
+      continue-on-error: true
+      env:
+        SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+      with:
+        args: --severity-threshold=high --file=backend/package.json
+
+  build:
+    name: Build Application
+    runs-on: ubuntu-latest
+    needs: [lint, test]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: ${{ env.NODE_VERSION }}
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install dependencies
+      working-directory: ./backend
+      run: npm ci --production
+
+    - name: Verify build
+      working-directory: ./backend
+      run: |
+        echo "Verifying application structure..."
+        ls -la
+        echo "Build verification complete"
+
+  deploy-staging:
+    name: Deploy to Staging
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
+    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
+    environment:
+      name: staging
+      url: ${{ secrets.STAGING_URL }}
+    
+    steps:
+    - name: Deploy to Render Staging
+      run: |
+        if [ -z "${{ secrets.RENDER_STAGING_DEPLOY_HOOK }}" ]; then
+          echo "⚠️ RENDER_STAGING_DEPLOY_HOOK not configured"
+          exit 0
+        fi
+        echo "🚀 Deploying to staging..."
+        curl -X POST "${{ secrets.RENDER_STAGING_DEPLOY_HOOK }}"
+        echo "✅ Staging deployment triggered"
+
+    - name: Wait for deployment
+      run: sleep 60
+
+    - name: Health check
+      run: |
+        if [ -z "${{ secrets.STAGING_URL }}" ]; then
+          echo "⚠️ STAGING_URL not configured, skipping health check"
+          exit 0
+        fi
+        echo "🏥 Checking staging health..."
+        curl -f "${{ secrets.STAGING_URL }}/health" || exit 1
+        echo "✅ Staging is healthy"
+
+  deploy-production:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [build, security-scan]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    environment:
+      name: production
+      url: ${{ secrets.PRODUCTION_URL }}
+    
+    steps:
+    - name: Deploy to Render Production
+      run: |
+        if [ -z "${{ secrets.RENDER_DEPLOY_HOOK }}" ]; then
+          echo "⚠️ RENDER_DEPLOY_HOOK not configured"
+          exit 0
+        fi
+        echo "🚀 Deploying to production..."
+        curl -X POST "${{ secrets.RENDER_DEPLOY_HOOK }}"
+        echo "✅ Production deployment triggered"
+
+    - name: Wait for deployment
+      run: sleep 90
+
+    - name: Health check
+      run: |
+        if [ -z "${{ secrets.PRODUCTION_URL }}" ]; then
+          echo "⚠️ PRODUCTION_URL not configured, skipping health check"
+          exit 0
+        fi
+        echo "🏥 Checking production health..."
+        curl -f "${{ secrets.PRODUCTION_URL }}/health" || exit 1
+        echo "✅ Production is healthy"
+
+    - name: Notify deployment success
+      if: success()
+      run: |
+        echo "✅ Production deployment successful!"
+        echo "🌐 Application URL: ${{ secrets.PRODUCTION_URL }}"
+
+    - name: Notify deployment failure
+      if: failure()
+      run: |
+        echo "❌ Production deployment failed!"
+        echo "Please check the logs and Render dashboard"
