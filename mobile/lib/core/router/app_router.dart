@@ -3,6 +3,7 @@ import '../../features/auth/presentation/screens/splash_screen.dart';
 import '../../features/auth/presentation/screens/onboarding_screen.dart';
 import '../../features/auth/presentation/screens/signin_screen.dart';
 import '../../features/auth/presentation/screens/signup_screen.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/shell/presentation/view/app_shell.dart';
 import '../../features/notification/presentation/screens/notification_list_screen.dart';
 import '../../features/notification/presentation/screens/notification_detail_screen.dart';
@@ -31,6 +32,10 @@ final appRouter = GoRouter(
     GoRoute(
       path: '/signup',
       builder: (context, state) => const SignUpScreen(),
+    ),
+    GoRoute(
+      path: '/forgot-password',
+      builder: (context, state) => const ForgotPasswordScreen(),
     ),
     GoRoute(
       path: '/home',

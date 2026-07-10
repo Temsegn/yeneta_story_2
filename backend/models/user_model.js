@@ -1,4 +1,5 @@
 import mongoose from "mongoose";
+
 const childProfileSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,20 +22,33 @@ const userSchema = new mongoose.Schema(
     },
     email: {
       type: String,
-      required: true,
+      required: false,
       unique: true,
+      sparse: true,
       lowercase: true,
       trim: true,
-      index: true,
     },
     phoneNumber: {
       type: String,
       required: true,
+      unique: true,
+      trim: true,
+      index: true,
     },
     password: {
       type: String,
       required: true,
       minlength: 6,
+    },
+    securityQuestion: {
+      type: String,
+      trim: true,
+      default: null,
+    },
+    securityAnswerHash: {
+      type: String,
+      select: false,
+      default: null,
     },
     role: {
       type: String,
@@ -52,7 +66,7 @@ const userSchema = new mongoose.Schema(
     },
     trialEndDate: {
       type: Date,
-      default: function() {
+      default: function () {
         const date = new Date();
         date.setDate(date.getDate() + 5); // 5-day trial
         return date;
@@ -66,7 +80,6 @@ const userSchema = new mongoose.Schema(
       type: Date,
       default: null,
     },
-    // Desired premium flags (kept alongside legacy fields for compatibility).
     isPremium: {
       type: Boolean,
       default: false,
@@ -94,6 +107,7 @@ const userSchema = new mongoose.Schema(
 userSchema.methods.toJSON = function () {
   const obj = this.toObject();
   delete obj.password;
+  delete obj.securityAnswerHash;
   return obj;
 };
 

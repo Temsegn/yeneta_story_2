@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kids_app/core/auth/auth_gate.dart';
+import 'package:kids_app/core/auth/auth_session.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../data/models/subscription_models.dart';
@@ -74,6 +75,21 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         return;
       }
 
+      if (status == 'expired') {
+        // Stale Chapa session — start a fresh checkout.
+        setState(() => _isProcessing = false);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment session expired. Starting a new checkout…'),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          _handleSubscribe(plan);
+        }
+        return;
+      }
+
       // Step 7 (client side): verify with backend after WebView closes.
       try {
         final verify = await dataSource.verifyPayment(checkout.data.txRef);
@@ -96,7 +112,20 @@ class _SubscriptionScreenState extends ConsumerState<SubscriptionScreen> {
         }
       }
     } on ApiException catch (e) {
-      if (mounted) _showPaymentResultModal(false, e.message);
+      if (mounted) {
+        if (e.statusCode == 401) {
+          await AuthSession.clear(ref);
+          if (!mounted) return;
+          final retry = await AuthGate.requireAuth(
+            context,
+            ref,
+            message: AppLocalizations.of(context).loginToPay,
+          );
+          if (retry) _handleSubscribe(plan);
+          return;
+        }
+        _showPaymentResultModal(false, e.message);
+      }
     } catch (e) {
       if (mounted) _showPaymentResultModal(false, _getErrorMessage(e));
     } finally {

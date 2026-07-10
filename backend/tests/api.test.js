@@ -13,13 +13,15 @@ describe("Protected API Endpoints", () => {
     email: "apitester@example.com",
     phoneNumber: "0987654321",
     password: "password123",
+    securityQuestion: "What is your nickname?",
+    securityAnswer: "Tester",
   };
 
   beforeAll(async () => {
     // Register and login to get the token for protected routes
     await request(app).post(`${apiPrefix}/auth/register`).send(testUser);
     const loginRes = await request(app).post(`${apiPrefix}/auth/login`).send({
-      email: testUser.email,
+      phoneNumber: testUser.phoneNumber,
       password: testUser.password,
     });
     

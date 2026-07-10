@@ -10,30 +10,76 @@ _$RegisterRequestImpl _$$RegisterRequestImplFromJson(
         Map<String, dynamic> json) =>
     _$RegisterRequestImpl(
       fullName: json['fullName'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       password: json['password'] as String,
       phoneNumber: json['phoneNumber'] as String,
+      securityQuestion: json['securityQuestion'] as String,
+      securityAnswer: json['securityAnswer'] as String,
     );
 
 Map<String, dynamic> _$$RegisterRequestImplToJson(
         _$RegisterRequestImpl instance) =>
     <String, dynamic>{
       'fullName': instance.fullName,
-      'email': instance.email,
+      if (instance.email case final value?) 'email': value,
       'password': instance.password,
       'phoneNumber': instance.phoneNumber,
+      'securityQuestion': instance.securityQuestion,
+      'securityAnswer': instance.securityAnswer,
     };
 
 _$LoginRequestImpl _$$LoginRequestImplFromJson(Map<String, dynamic> json) =>
     _$LoginRequestImpl(
-      email: json['email'] as String,
+      phoneNumber: json['phoneNumber'] as String,
       password: json['password'] as String,
     );
 
 Map<String, dynamic> _$$LoginRequestImplToJson(_$LoginRequestImpl instance) =>
     <String, dynamic>{
-      'email': instance.email,
+      'phoneNumber': instance.phoneNumber,
       'password': instance.password,
+    };
+
+_$ForgotPasswordRequestImpl _$$ForgotPasswordRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ForgotPasswordRequestImpl(
+      phoneNumber: json['phoneNumber'] as String,
+    );
+
+Map<String, dynamic> _$$ForgotPasswordRequestImplToJson(
+        _$ForgotPasswordRequestImpl instance) =>
+    <String, dynamic>{
+      'phoneNumber': instance.phoneNumber,
+    };
+
+_$ForgotPasswordResponseImpl _$$ForgotPasswordResponseImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ForgotPasswordResponseImpl(
+      phoneNumber: json['phoneNumber'] as String,
+      securityQuestion: json['securityQuestion'] as String,
+    );
+
+Map<String, dynamic> _$$ForgotPasswordResponseImplToJson(
+        _$ForgotPasswordResponseImpl instance) =>
+    <String, dynamic>{
+      'phoneNumber': instance.phoneNumber,
+      'securityQuestion': instance.securityQuestion,
+    };
+
+_$ResetPasswordRequestImpl _$$ResetPasswordRequestImplFromJson(
+        Map<String, dynamic> json) =>
+    _$ResetPasswordRequestImpl(
+      phoneNumber: json['phoneNumber'] as String,
+      securityAnswer: json['securityAnswer'] as String,
+      newPassword: json['newPassword'] as String,
+    );
+
+Map<String, dynamic> _$$ResetPasswordRequestImplToJson(
+        _$ResetPasswordRequestImpl instance) =>
+    <String, dynamic>{
+      'phoneNumber': instance.phoneNumber,
+      'securityAnswer': instance.securityAnswer,
+      'newPassword': instance.newPassword,
     };
 
 _$UpdateProfileRequestImpl _$$UpdateProfileRequestImplFromJson(
@@ -41,6 +87,7 @@ _$UpdateProfileRequestImpl _$$UpdateProfileRequestImplFromJson(
     _$UpdateProfileRequestImpl(
       fullName: json['fullName'] as String?,
       email: json['email'] as String?,
+      phoneNumber: json['phoneNumber'] as String?,
     );
 
 Map<String, dynamic> _$$UpdateProfileRequestImplToJson(
@@ -48,6 +95,7 @@ Map<String, dynamic> _$$UpdateProfileRequestImplToJson(
     <String, dynamic>{
       'fullName': instance.fullName,
       'email': instance.email,
+      'phoneNumber': instance.phoneNumber,
     };
 
 _$AuthResponseImpl _$$AuthResponseImplFromJson(Map<String, dynamic> json) =>
@@ -66,7 +114,7 @@ _$UserDataImpl _$$UserDataImplFromJson(Map<String, dynamic> json) =>
     _$UserDataImpl(
       id: json['id'] as String,
       fullName: json['fullName'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       role: json['role'] as String,
       phoneNumber: json['phoneNumber'] as String?,
       childProfiles: (json['childProfiles'] as List<dynamic>?)
@@ -102,9 +150,10 @@ Map<String, dynamic> _$$ChildProfileImplToJson(_$ChildProfileImpl instance) =>
 
 _$UserProfileImpl _$$UserProfileImplFromJson(Map<String, dynamic> json) =>
     _$UserProfileImpl(
-      id: json['id'] as String,
+      mongoId: json['_id'] as String?,
+      id: json['id'] as String?,
       fullName: json['fullName'] as String,
-      email: json['email'] as String,
+      email: json['email'] as String?,
       role: json['role'] as String,
       phoneNumber: json['phoneNumber'] as String?,
       childProfiles: (json['childProfiles'] as List<dynamic>?)
@@ -115,6 +164,7 @@ _$UserProfileImpl _$$UserProfileImplFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$$UserProfileImplToJson(_$UserProfileImpl instance) =>
     <String, dynamic>{
+      '_id': instance.mongoId,
       'id': instance.id,
       'fullName': instance.fullName,
       'email': instance.email,

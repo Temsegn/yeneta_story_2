@@ -1,7 +1,7 @@
 /// API configuration constants
 class ApiConfig {
   // Production API URL
-  static const String baseUrl = 'https://yeneta-story-2.onrender.com/api/v1';
+  static const String baseUrl = 'https://yeneta-zq3w.onrender.com/api/v1';
   
   // For local development, uncomment this line:
   // static const String baseUrl = 'http://10.0.2.2:5000/api/v1'; // Android emulator

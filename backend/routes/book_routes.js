@@ -50,7 +50,7 @@ const router = express.Router();
  *                 currentPage:
  *                   type: integer
  */
-router.get("/",protect, getAllBooks);
+router.get("/", getAllBooks);
 
 /**
  * @swagger

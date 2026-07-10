@@ -21,9 +21,12 @@ RegisterRequest _$RegisterRequestFromJson(Map<String, dynamic> json) {
 /// @nodoc
 mixin _$RegisterRequest {
   String get fullName => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
+  @JsonKey(includeIfNull: false)
+  String? get email => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
   String get phoneNumber => throw _privateConstructorUsedError;
+  String get securityQuestion => throw _privateConstructorUsedError;
+  String get securityAnswer => throw _privateConstructorUsedError;
 
   /// Serializes this RegisterRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -42,7 +45,12 @@ abstract class $RegisterRequestCopyWith<$Res> {
       _$RegisterRequestCopyWithImpl<$Res, RegisterRequest>;
   @useResult
   $Res call(
-      {String fullName, String email, String password, String phoneNumber});
+      {String fullName,
+      @JsonKey(includeIfNull: false) String? email,
+      String password,
+      String phoneNumber,
+      String securityQuestion,
+      String securityAnswer});
 }
 
 /// @nodoc
@@ -61,19 +69,21 @@ class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
   @override
   $Res call({
     Object? fullName = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? password = null,
     Object? phoneNumber = null,
+    Object? securityQuestion = null,
+    Object? securityAnswer = null,
   }) {
     return _then(_value.copyWith(
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       password: null == password
           ? _value.password
           : password // ignore: cast_nullable_to_non_nullable
@@ -81,6 +91,14 @@ class _$RegisterRequestCopyWithImpl<$Res, $Val extends RegisterRequest>
       phoneNumber: null == phoneNumber
           ? _value.phoneNumber
           : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityQuestion: null == securityQuestion
+          ? _value.securityQuestion
+          : securityQuestion // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityAnswer: null == securityAnswer
+          ? _value.securityAnswer
+          : securityAnswer // ignore: cast_nullable_to_non_nullable
               as String,
     ) as $Val);
   }
@@ -95,7 +113,12 @@ abstract class _$$RegisterRequestImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String fullName, String email, String password, String phoneNumber});
+      {String fullName,
+      @JsonKey(includeIfNull: false) String? email,
+      String password,
+      String phoneNumber,
+      String securityQuestion,
+      String securityAnswer});
 }
 
 /// @nodoc
@@ -112,19 +135,21 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
   @override
   $Res call({
     Object? fullName = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? password = null,
     Object? phoneNumber = null,
+    Object? securityQuestion = null,
+    Object? securityAnswer = null,
   }) {
     return _then(_$RegisterRequestImpl(
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       password: null == password
           ? _value.password
           : password // ignore: cast_nullable_to_non_nullable
@@ -132,6 +157,14 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
       phoneNumber: null == phoneNumber
           ? _value.phoneNumber
           : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityQuestion: null == securityQuestion
+          ? _value.securityQuestion
+          : securityQuestion // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityAnswer: null == securityAnswer
+          ? _value.securityAnswer
+          : securityAnswer // ignore: cast_nullable_to_non_nullable
               as String,
     ));
   }
@@ -142,9 +175,11 @@ class __$$RegisterRequestImplCopyWithImpl<$Res>
 class _$RegisterRequestImpl implements _RegisterRequest {
   const _$RegisterRequestImpl(
       {required this.fullName,
-      required this.email,
+      @JsonKey(includeIfNull: false) this.email,
       required this.password,
-      required this.phoneNumber});
+      required this.phoneNumber,
+      required this.securityQuestion,
+      required this.securityAnswer});
 
   factory _$RegisterRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$RegisterRequestImplFromJson(json);
@@ -152,15 +187,20 @@ class _$RegisterRequestImpl implements _RegisterRequest {
   @override
   final String fullName;
   @override
-  final String email;
+  @JsonKey(includeIfNull: false)
+  final String? email;
   @override
   final String password;
   @override
   final String phoneNumber;
+  @override
+  final String securityQuestion;
+  @override
+  final String securityAnswer;
 
   @override
   String toString() {
-    return 'RegisterRequest(fullName: $fullName, email: $email, password: $password, phoneNumber: $phoneNumber)';
+    return 'RegisterRequest(fullName: $fullName, email: $email, password: $password, phoneNumber: $phoneNumber, securityQuestion: $securityQuestion, securityAnswer: $securityAnswer)';
   }
 
   @override
@@ -174,13 +214,17 @@ class _$RegisterRequestImpl implements _RegisterRequest {
             (identical(other.password, password) ||
                 other.password == password) &&
             (identical(other.phoneNumber, phoneNumber) ||
-                other.phoneNumber == phoneNumber));
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.securityQuestion, securityQuestion) ||
+                other.securityQuestion == securityQuestion) &&
+            (identical(other.securityAnswer, securityAnswer) ||
+                other.securityAnswer == securityAnswer));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode =>
-      Object.hash(runtimeType, fullName, email, password, phoneNumber);
+  int get hashCode => Object.hash(runtimeType, fullName, email, password,
+      phoneNumber, securityQuestion, securityAnswer);
 
   /// Create a copy of RegisterRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -202,9 +246,11 @@ class _$RegisterRequestImpl implements _RegisterRequest {
 abstract class _RegisterRequest implements RegisterRequest {
   const factory _RegisterRequest(
       {required final String fullName,
-      required final String email,
+      @JsonKey(includeIfNull: false) final String? email,
       required final String password,
-      required final String phoneNumber}) = _$RegisterRequestImpl;
+      required final String phoneNumber,
+      required final String securityQuestion,
+      required final String securityAnswer}) = _$RegisterRequestImpl;
 
   factory _RegisterRequest.fromJson(Map<String, dynamic> json) =
       _$RegisterRequestImpl.fromJson;
@@ -212,11 +258,16 @@ abstract class _RegisterRequest implements RegisterRequest {
   @override
   String get fullName;
   @override
-  String get email;
+  @JsonKey(includeIfNull: false)
+  String? get email;
   @override
   String get password;
   @override
   String get phoneNumber;
+  @override
+  String get securityQuestion;
+  @override
+  String get securityAnswer;
 
   /// Create a copy of RegisterRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -232,7 +283,7 @@ LoginRequest _$LoginRequestFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$LoginRequest {
-  String get email => throw _privateConstructorUsedError;
+  String get phoneNumber => throw _privateConstructorUsedError;
   String get password => throw _privateConstructorUsedError;
 
   /// Serializes this LoginRequest to a JSON map.
@@ -251,7 +302,7 @@ abstract class $LoginRequestCopyWith<$Res> {
           LoginRequest value, $Res Function(LoginRequest) then) =
       _$LoginRequestCopyWithImpl<$Res, LoginRequest>;
   @useResult
-  $Res call({String email, String password});
+  $Res call({String phoneNumber, String password});
 }
 
 /// @nodoc
@@ -269,13 +320,13 @@ class _$LoginRequestCopyWithImpl<$Res, $Val extends LoginRequest>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? phoneNumber = null,
     Object? password = null,
   }) {
     return _then(_value.copyWith(
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _value.password
@@ -293,7 +344,7 @@ abstract class _$$LoginRequestImplCopyWith<$Res>
       __$$LoginRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String email, String password});
+  $Res call({String phoneNumber, String password});
 }
 
 /// @nodoc
@@ -309,13 +360,13 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? email = null,
+    Object? phoneNumber = null,
     Object? password = null,
   }) {
     return _then(_$LoginRequestImpl(
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
               as String,
       password: null == password
           ? _value.password
@@ -328,19 +379,19 @@ class __$$LoginRequestImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$LoginRequestImpl implements _LoginRequest {
-  const _$LoginRequestImpl({required this.email, required this.password});
+  const _$LoginRequestImpl({required this.phoneNumber, required this.password});
 
   factory _$LoginRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$LoginRequestImplFromJson(json);
 
   @override
-  final String email;
+  final String phoneNumber;
   @override
   final String password;
 
   @override
   String toString() {
-    return 'LoginRequest(email: $email, password: $password)';
+    return 'LoginRequest(phoneNumber: $phoneNumber, password: $password)';
   }
 
   @override
@@ -348,14 +399,15 @@ class _$LoginRequestImpl implements _LoginRequest {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$LoginRequestImpl &&
-            (identical(other.email, email) || other.email == email) &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
             (identical(other.password, password) ||
                 other.password == password));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, email, password);
+  int get hashCode => Object.hash(runtimeType, phoneNumber, password);
 
   /// Create a copy of LoginRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -375,14 +427,14 @@ class _$LoginRequestImpl implements _LoginRequest {
 
 abstract class _LoginRequest implements LoginRequest {
   const factory _LoginRequest(
-      {required final String email,
+      {required final String phoneNumber,
       required final String password}) = _$LoginRequestImpl;
 
   factory _LoginRequest.fromJson(Map<String, dynamic> json) =
       _$LoginRequestImpl.fromJson;
 
   @override
-  String get email;
+  String get phoneNumber;
   @override
   String get password;
 
@@ -394,6 +446,532 @@ abstract class _LoginRequest implements LoginRequest {
       throw _privateConstructorUsedError;
 }
 
+ForgotPasswordRequest _$ForgotPasswordRequestFromJson(
+    Map<String, dynamic> json) {
+  return _ForgotPasswordRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ForgotPasswordRequest {
+  String get phoneNumber => throw _privateConstructorUsedError;
+
+  /// Serializes this ForgotPasswordRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ForgotPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ForgotPasswordRequestCopyWith<ForgotPasswordRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ForgotPasswordRequestCopyWith<$Res> {
+  factory $ForgotPasswordRequestCopyWith(ForgotPasswordRequest value,
+          $Res Function(ForgotPasswordRequest) then) =
+      _$ForgotPasswordRequestCopyWithImpl<$Res, ForgotPasswordRequest>;
+  @useResult
+  $Res call({String phoneNumber});
+}
+
+/// @nodoc
+class _$ForgotPasswordRequestCopyWithImpl<$Res,
+        $Val extends ForgotPasswordRequest>
+    implements $ForgotPasswordRequestCopyWith<$Res> {
+  _$ForgotPasswordRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ForgotPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? phoneNumber = null,
+  }) {
+    return _then(_value.copyWith(
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ForgotPasswordRequestImplCopyWith<$Res>
+    implements $ForgotPasswordRequestCopyWith<$Res> {
+  factory _$$ForgotPasswordRequestImplCopyWith(
+          _$ForgotPasswordRequestImpl value,
+          $Res Function(_$ForgotPasswordRequestImpl) then) =
+      __$$ForgotPasswordRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String phoneNumber});
+}
+
+/// @nodoc
+class __$$ForgotPasswordRequestImplCopyWithImpl<$Res>
+    extends _$ForgotPasswordRequestCopyWithImpl<$Res,
+        _$ForgotPasswordRequestImpl>
+    implements _$$ForgotPasswordRequestImplCopyWith<$Res> {
+  __$$ForgotPasswordRequestImplCopyWithImpl(_$ForgotPasswordRequestImpl _value,
+      $Res Function(_$ForgotPasswordRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ForgotPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? phoneNumber = null,
+  }) {
+    return _then(_$ForgotPasswordRequestImpl(
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ForgotPasswordRequestImpl implements _ForgotPasswordRequest {
+  const _$ForgotPasswordRequestImpl({required this.phoneNumber});
+
+  factory _$ForgotPasswordRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ForgotPasswordRequestImplFromJson(json);
+
+  @override
+  final String phoneNumber;
+
+  @override
+  String toString() {
+    return 'ForgotPasswordRequest(phoneNumber: $phoneNumber)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ForgotPasswordRequestImpl &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, phoneNumber);
+
+  /// Create a copy of ForgotPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ForgotPasswordRequestImplCopyWith<_$ForgotPasswordRequestImpl>
+      get copyWith => __$$ForgotPasswordRequestImplCopyWithImpl<
+          _$ForgotPasswordRequestImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ForgotPasswordRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ForgotPasswordRequest implements ForgotPasswordRequest {
+  const factory _ForgotPasswordRequest({required final String phoneNumber}) =
+      _$ForgotPasswordRequestImpl;
+
+  factory _ForgotPasswordRequest.fromJson(Map<String, dynamic> json) =
+      _$ForgotPasswordRequestImpl.fromJson;
+
+  @override
+  String get phoneNumber;
+
+  /// Create a copy of ForgotPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ForgotPasswordRequestImplCopyWith<_$ForgotPasswordRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+ForgotPasswordResponse _$ForgotPasswordResponseFromJson(
+    Map<String, dynamic> json) {
+  return _ForgotPasswordResponse.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ForgotPasswordResponse {
+  String get phoneNumber => throw _privateConstructorUsedError;
+  String get securityQuestion => throw _privateConstructorUsedError;
+
+  /// Serializes this ForgotPasswordResponse to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ForgotPasswordResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ForgotPasswordResponseCopyWith<ForgotPasswordResponse> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ForgotPasswordResponseCopyWith<$Res> {
+  factory $ForgotPasswordResponseCopyWith(ForgotPasswordResponse value,
+          $Res Function(ForgotPasswordResponse) then) =
+      _$ForgotPasswordResponseCopyWithImpl<$Res, ForgotPasswordResponse>;
+  @useResult
+  $Res call({String phoneNumber, String securityQuestion});
+}
+
+/// @nodoc
+class _$ForgotPasswordResponseCopyWithImpl<$Res,
+        $Val extends ForgotPasswordResponse>
+    implements $ForgotPasswordResponseCopyWith<$Res> {
+  _$ForgotPasswordResponseCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ForgotPasswordResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? phoneNumber = null,
+    Object? securityQuestion = null,
+  }) {
+    return _then(_value.copyWith(
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityQuestion: null == securityQuestion
+          ? _value.securityQuestion
+          : securityQuestion // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ForgotPasswordResponseImplCopyWith<$Res>
+    implements $ForgotPasswordResponseCopyWith<$Res> {
+  factory _$$ForgotPasswordResponseImplCopyWith(
+          _$ForgotPasswordResponseImpl value,
+          $Res Function(_$ForgotPasswordResponseImpl) then) =
+      __$$ForgotPasswordResponseImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String phoneNumber, String securityQuestion});
+}
+
+/// @nodoc
+class __$$ForgotPasswordResponseImplCopyWithImpl<$Res>
+    extends _$ForgotPasswordResponseCopyWithImpl<$Res,
+        _$ForgotPasswordResponseImpl>
+    implements _$$ForgotPasswordResponseImplCopyWith<$Res> {
+  __$$ForgotPasswordResponseImplCopyWithImpl(
+      _$ForgotPasswordResponseImpl _value,
+      $Res Function(_$ForgotPasswordResponseImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ForgotPasswordResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? phoneNumber = null,
+    Object? securityQuestion = null,
+  }) {
+    return _then(_$ForgotPasswordResponseImpl(
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityQuestion: null == securityQuestion
+          ? _value.securityQuestion
+          : securityQuestion // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ForgotPasswordResponseImpl implements _ForgotPasswordResponse {
+  const _$ForgotPasswordResponseImpl(
+      {required this.phoneNumber, required this.securityQuestion});
+
+  factory _$ForgotPasswordResponseImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ForgotPasswordResponseImplFromJson(json);
+
+  @override
+  final String phoneNumber;
+  @override
+  final String securityQuestion;
+
+  @override
+  String toString() {
+    return 'ForgotPasswordResponse(phoneNumber: $phoneNumber, securityQuestion: $securityQuestion)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ForgotPasswordResponseImpl &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.securityQuestion, securityQuestion) ||
+                other.securityQuestion == securityQuestion));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode => Object.hash(runtimeType, phoneNumber, securityQuestion);
+
+  /// Create a copy of ForgotPasswordResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ForgotPasswordResponseImplCopyWith<_$ForgotPasswordResponseImpl>
+      get copyWith => __$$ForgotPasswordResponseImplCopyWithImpl<
+          _$ForgotPasswordResponseImpl>(this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ForgotPasswordResponseImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ForgotPasswordResponse implements ForgotPasswordResponse {
+  const factory _ForgotPasswordResponse(
+      {required final String phoneNumber,
+      required final String securityQuestion}) = _$ForgotPasswordResponseImpl;
+
+  factory _ForgotPasswordResponse.fromJson(Map<String, dynamic> json) =
+      _$ForgotPasswordResponseImpl.fromJson;
+
+  @override
+  String get phoneNumber;
+  @override
+  String get securityQuestion;
+
+  /// Create a copy of ForgotPasswordResponse
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ForgotPasswordResponseImplCopyWith<_$ForgotPasswordResponseImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
+ResetPasswordRequest _$ResetPasswordRequestFromJson(Map<String, dynamic> json) {
+  return _ResetPasswordRequest.fromJson(json);
+}
+
+/// @nodoc
+mixin _$ResetPasswordRequest {
+  String get phoneNumber => throw _privateConstructorUsedError;
+  String get securityAnswer => throw _privateConstructorUsedError;
+  String get newPassword => throw _privateConstructorUsedError;
+
+  /// Serializes this ResetPasswordRequest to a JSON map.
+  Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
+
+  /// Create a copy of ResetPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  $ResetPasswordRequestCopyWith<ResetPasswordRequest> get copyWith =>
+      throw _privateConstructorUsedError;
+}
+
+/// @nodoc
+abstract class $ResetPasswordRequestCopyWith<$Res> {
+  factory $ResetPasswordRequestCopyWith(ResetPasswordRequest value,
+          $Res Function(ResetPasswordRequest) then) =
+      _$ResetPasswordRequestCopyWithImpl<$Res, ResetPasswordRequest>;
+  @useResult
+  $Res call({String phoneNumber, String securityAnswer, String newPassword});
+}
+
+/// @nodoc
+class _$ResetPasswordRequestCopyWithImpl<$Res,
+        $Val extends ResetPasswordRequest>
+    implements $ResetPasswordRequestCopyWith<$Res> {
+  _$ResetPasswordRequestCopyWithImpl(this._value, this._then);
+
+  // ignore: unused_field
+  final $Val _value;
+  // ignore: unused_field
+  final $Res Function($Val) _then;
+
+  /// Create a copy of ResetPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? phoneNumber = null,
+    Object? securityAnswer = null,
+    Object? newPassword = null,
+  }) {
+    return _then(_value.copyWith(
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityAnswer: null == securityAnswer
+          ? _value.securityAnswer
+          : securityAnswer // ignore: cast_nullable_to_non_nullable
+              as String,
+      newPassword: null == newPassword
+          ? _value.newPassword
+          : newPassword // ignore: cast_nullable_to_non_nullable
+              as String,
+    ) as $Val);
+  }
+}
+
+/// @nodoc
+abstract class _$$ResetPasswordRequestImplCopyWith<$Res>
+    implements $ResetPasswordRequestCopyWith<$Res> {
+  factory _$$ResetPasswordRequestImplCopyWith(_$ResetPasswordRequestImpl value,
+          $Res Function(_$ResetPasswordRequestImpl) then) =
+      __$$ResetPasswordRequestImplCopyWithImpl<$Res>;
+  @override
+  @useResult
+  $Res call({String phoneNumber, String securityAnswer, String newPassword});
+}
+
+/// @nodoc
+class __$$ResetPasswordRequestImplCopyWithImpl<$Res>
+    extends _$ResetPasswordRequestCopyWithImpl<$Res, _$ResetPasswordRequestImpl>
+    implements _$$ResetPasswordRequestImplCopyWith<$Res> {
+  __$$ResetPasswordRequestImplCopyWithImpl(_$ResetPasswordRequestImpl _value,
+      $Res Function(_$ResetPasswordRequestImpl) _then)
+      : super(_value, _then);
+
+  /// Create a copy of ResetPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @pragma('vm:prefer-inline')
+  @override
+  $Res call({
+    Object? phoneNumber = null,
+    Object? securityAnswer = null,
+    Object? newPassword = null,
+  }) {
+    return _then(_$ResetPasswordRequestImpl(
+      phoneNumber: null == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String,
+      securityAnswer: null == securityAnswer
+          ? _value.securityAnswer
+          : securityAnswer // ignore: cast_nullable_to_non_nullable
+              as String,
+      newPassword: null == newPassword
+          ? _value.newPassword
+          : newPassword // ignore: cast_nullable_to_non_nullable
+              as String,
+    ));
+  }
+}
+
+/// @nodoc
+@JsonSerializable()
+class _$ResetPasswordRequestImpl implements _ResetPasswordRequest {
+  const _$ResetPasswordRequestImpl(
+      {required this.phoneNumber,
+      required this.securityAnswer,
+      required this.newPassword});
+
+  factory _$ResetPasswordRequestImpl.fromJson(Map<String, dynamic> json) =>
+      _$$ResetPasswordRequestImplFromJson(json);
+
+  @override
+  final String phoneNumber;
+  @override
+  final String securityAnswer;
+  @override
+  final String newPassword;
+
+  @override
+  String toString() {
+    return 'ResetPasswordRequest(phoneNumber: $phoneNumber, securityAnswer: $securityAnswer, newPassword: $newPassword)';
+  }
+
+  @override
+  bool operator ==(Object other) {
+    return identical(this, other) ||
+        (other.runtimeType == runtimeType &&
+            other is _$ResetPasswordRequestImpl &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber) &&
+            (identical(other.securityAnswer, securityAnswer) ||
+                other.securityAnswer == securityAnswer) &&
+            (identical(other.newPassword, newPassword) ||
+                other.newPassword == newPassword));
+  }
+
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  int get hashCode =>
+      Object.hash(runtimeType, phoneNumber, securityAnswer, newPassword);
+
+  /// Create a copy of ResetPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  @override
+  @pragma('vm:prefer-inline')
+  _$$ResetPasswordRequestImplCopyWith<_$ResetPasswordRequestImpl>
+      get copyWith =>
+          __$$ResetPasswordRequestImplCopyWithImpl<_$ResetPasswordRequestImpl>(
+              this, _$identity);
+
+  @override
+  Map<String, dynamic> toJson() {
+    return _$$ResetPasswordRequestImplToJson(
+      this,
+    );
+  }
+}
+
+abstract class _ResetPasswordRequest implements ResetPasswordRequest {
+  const factory _ResetPasswordRequest(
+      {required final String phoneNumber,
+      required final String securityAnswer,
+      required final String newPassword}) = _$ResetPasswordRequestImpl;
+
+  factory _ResetPasswordRequest.fromJson(Map<String, dynamic> json) =
+      _$ResetPasswordRequestImpl.fromJson;
+
+  @override
+  String get phoneNumber;
+  @override
+  String get securityAnswer;
+  @override
+  String get newPassword;
+
+  /// Create a copy of ResetPasswordRequest
+  /// with the given fields replaced by the non-null parameter values.
+  @override
+  @JsonKey(includeFromJson: false, includeToJson: false)
+  _$$ResetPasswordRequestImplCopyWith<_$ResetPasswordRequestImpl>
+      get copyWith => throw _privateConstructorUsedError;
+}
+
 UpdateProfileRequest _$UpdateProfileRequestFromJson(Map<String, dynamic> json) {
   return _UpdateProfileRequest.fromJson(json);
 }
@@ -402,6 +980,7 @@ UpdateProfileRequest _$UpdateProfileRequestFromJson(Map<String, dynamic> json) {
 mixin _$UpdateProfileRequest {
   String? get fullName => throw _privateConstructorUsedError;
   String? get email => throw _privateConstructorUsedError;
+  String? get phoneNumber => throw _privateConstructorUsedError;
 
   /// Serializes this UpdateProfileRequest to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
@@ -419,7 +998,7 @@ abstract class $UpdateProfileRequestCopyWith<$Res> {
           $Res Function(UpdateProfileRequest) then) =
       _$UpdateProfileRequestCopyWithImpl<$Res, UpdateProfileRequest>;
   @useResult
-  $Res call({String? fullName, String? email});
+  $Res call({String? fullName, String? email, String? phoneNumber});
 }
 
 /// @nodoc
@@ -440,6 +1019,7 @@ class _$UpdateProfileRequestCopyWithImpl<$Res,
   $Res call({
     Object? fullName = freezed,
     Object? email = freezed,
+    Object? phoneNumber = freezed,
   }) {
     return _then(_value.copyWith(
       fullName: freezed == fullName
@@ -449,6 +1029,10 @@ class _$UpdateProfileRequestCopyWithImpl<$Res,
       email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
+              as String?,
+      phoneNumber: freezed == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
               as String?,
     ) as $Val);
   }
@@ -462,7 +1046,7 @@ abstract class _$$UpdateProfileRequestImplCopyWith<$Res>
       __$$UpdateProfileRequestImplCopyWithImpl<$Res>;
   @override
   @useResult
-  $Res call({String? fullName, String? email});
+  $Res call({String? fullName, String? email, String? phoneNumber});
 }
 
 /// @nodoc
@@ -480,6 +1064,7 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
   $Res call({
     Object? fullName = freezed,
     Object? email = freezed,
+    Object? phoneNumber = freezed,
   }) {
     return _then(_$UpdateProfileRequestImpl(
       fullName: freezed == fullName
@@ -490,6 +1075,10 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
               as String?,
+      phoneNumber: freezed == phoneNumber
+          ? _value.phoneNumber
+          : phoneNumber // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -497,7 +1086,8 @@ class __$$UpdateProfileRequestImplCopyWithImpl<$Res>
 /// @nodoc
 @JsonSerializable()
 class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
-  const _$UpdateProfileRequestImpl({this.fullName, this.email});
+  const _$UpdateProfileRequestImpl(
+      {this.fullName, this.email, this.phoneNumber});
 
   factory _$UpdateProfileRequestImpl.fromJson(Map<String, dynamic> json) =>
       _$$UpdateProfileRequestImplFromJson(json);
@@ -506,10 +1096,12 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
   final String? fullName;
   @override
   final String? email;
+  @override
+  final String? phoneNumber;
 
   @override
   String toString() {
-    return 'UpdateProfileRequest(fullName: $fullName, email: $email)';
+    return 'UpdateProfileRequest(fullName: $fullName, email: $email, phoneNumber: $phoneNumber)';
   }
 
   @override
@@ -519,12 +1111,14 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
             other is _$UpdateProfileRequestImpl &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
-            (identical(other.email, email) || other.email == email));
+            (identical(other.email, email) || other.email == email) &&
+            (identical(other.phoneNumber, phoneNumber) ||
+                other.phoneNumber == phoneNumber));
   }
 
   @JsonKey(includeFromJson: false, includeToJson: false)
   @override
-  int get hashCode => Object.hash(runtimeType, fullName, email);
+  int get hashCode => Object.hash(runtimeType, fullName, email, phoneNumber);
 
   /// Create a copy of UpdateProfileRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -547,7 +1141,8 @@ class _$UpdateProfileRequestImpl implements _UpdateProfileRequest {
 abstract class _UpdateProfileRequest implements UpdateProfileRequest {
   const factory _UpdateProfileRequest(
       {final String? fullName,
-      final String? email}) = _$UpdateProfileRequestImpl;
+      final String? email,
+      final String? phoneNumber}) = _$UpdateProfileRequestImpl;
 
   factory _UpdateProfileRequest.fromJson(Map<String, dynamic> json) =
       _$UpdateProfileRequestImpl.fromJson;
@@ -556,6 +1151,8 @@ abstract class _UpdateProfileRequest implements UpdateProfileRequest {
   String? get fullName;
   @override
   String? get email;
+  @override
+  String? get phoneNumber;
 
   /// Create a copy of UpdateProfileRequest
   /// with the given fields replaced by the non-null parameter values.
@@ -755,7 +1352,7 @@ UserData _$UserDataFromJson(Map<String, dynamic> json) {
 mixin _$UserData {
   String get id => throw _privateConstructorUsedError;
   String get fullName => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   String? get phoneNumber => throw _privateConstructorUsedError;
   List<ChildProfile>? get childProfiles => throw _privateConstructorUsedError;
@@ -779,7 +1376,7 @@ abstract class $UserDataCopyWith<$Res> {
   $Res call(
       {String id,
       String fullName,
-      String email,
+      String? email,
       String role,
       String? phoneNumber,
       List<ChildProfile>? childProfiles,
@@ -803,7 +1400,7 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
   $Res call({
     Object? id = null,
     Object? fullName = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? role = null,
     Object? phoneNumber = freezed,
     Object? childProfiles = freezed,
@@ -818,10 +1415,10 @@ class _$UserDataCopyWithImpl<$Res, $Val extends UserData>
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -853,7 +1450,7 @@ abstract class _$$UserDataImplCopyWith<$Res>
   $Res call(
       {String id,
       String fullName,
-      String email,
+      String? email,
       String role,
       String? phoneNumber,
       List<ChildProfile>? childProfiles,
@@ -875,7 +1472,7 @@ class __$$UserDataImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? fullName = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? role = null,
     Object? phoneNumber = freezed,
     Object? childProfiles = freezed,
@@ -890,10 +1487,10 @@ class __$$UserDataImplCopyWithImpl<$Res>
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -920,7 +1517,7 @@ class _$UserDataImpl implements _UserData {
   const _$UserDataImpl(
       {required this.id,
       required this.fullName,
-      required this.email,
+      this.email,
       required this.role,
       this.phoneNumber,
       final List<ChildProfile>? childProfiles,
@@ -935,7 +1532,7 @@ class _$UserDataImpl implements _UserData {
   @override
   final String fullName;
   @override
-  final String email;
+  final String? email;
   @override
   final String role;
   @override
@@ -1008,7 +1605,7 @@ abstract class _UserData implements UserData {
   const factory _UserData(
       {required final String id,
       required final String fullName,
-      required final String email,
+      final String? email,
       required final String role,
       final String? phoneNumber,
       final List<ChildProfile>? childProfiles,
@@ -1022,7 +1619,7 @@ abstract class _UserData implements UserData {
   @override
   String get fullName;
   @override
-  String get email;
+  String? get email;
   @override
   String get role;
   @override
@@ -1214,9 +1811,11 @@ UserProfile _$UserProfileFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$UserProfile {
-  String get id => throw _privateConstructorUsedError;
+  @JsonKey(name: '_id')
+  String? get mongoId => throw _privateConstructorUsedError;
+  String? get id => throw _privateConstructorUsedError;
   String get fullName => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
+  String? get email => throw _privateConstructorUsedError;
   String get role => throw _privateConstructorUsedError;
   String? get phoneNumber => throw _privateConstructorUsedError;
   List<ChildProfile>? get childProfiles => throw _privateConstructorUsedError;
@@ -1239,9 +1838,10 @@ abstract class $UserProfileCopyWith<$Res> {
       _$UserProfileCopyWithImpl<$Res, UserProfile>;
   @useResult
   $Res call(
-      {String id,
+      {@JsonKey(name: '_id') String? mongoId,
+      String? id,
       String fullName,
-      String email,
+      String? email,
       String role,
       String? phoneNumber,
       List<ChildProfile>? childProfiles,
@@ -1263,27 +1863,32 @@ class _$UserProfileCopyWithImpl<$Res, $Val extends UserProfile>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? mongoId = freezed,
+    Object? id = freezed,
     Object? fullName = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? role = null,
     Object? phoneNumber = freezed,
     Object? childProfiles = freezed,
     Object? isActive = freezed,
   }) {
     return _then(_value.copyWith(
-      id: null == id
+      mongoId: freezed == mongoId
+          ? _value.mongoId
+          : mongoId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -1313,9 +1918,10 @@ abstract class _$$UserProfileImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String id,
+      {@JsonKey(name: '_id') String? mongoId,
+      String? id,
       String fullName,
-      String email,
+      String? email,
       String role,
       String? phoneNumber,
       List<ChildProfile>? childProfiles,
@@ -1335,27 +1941,32 @@ class __$$UserProfileImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? id = null,
+    Object? mongoId = freezed,
+    Object? id = freezed,
     Object? fullName = null,
-    Object? email = null,
+    Object? email = freezed,
     Object? role = null,
     Object? phoneNumber = freezed,
     Object? childProfiles = freezed,
     Object? isActive = freezed,
   }) {
     return _then(_$UserProfileImpl(
-      id: null == id
+      mongoId: freezed == mongoId
+          ? _value.mongoId
+          : mongoId // ignore: cast_nullable_to_non_nullable
+              as String?,
+      id: freezed == id
           ? _value.id
           : id // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       fullName: null == fullName
           ? _value.fullName
           : fullName // ignore: cast_nullable_to_non_nullable
               as String,
-      email: null == email
+      email: freezed == email
           ? _value.email
           : email // ignore: cast_nullable_to_non_nullable
-              as String,
+              as String?,
       role: null == role
           ? _value.role
           : role // ignore: cast_nullable_to_non_nullable
@@ -1380,9 +1991,10 @@ class __$$UserProfileImplCopyWithImpl<$Res>
 @JsonSerializable()
 class _$UserProfileImpl implements _UserProfile {
   const _$UserProfileImpl(
-      {required this.id,
+      {@JsonKey(name: '_id') this.mongoId,
+      this.id,
       required this.fullName,
-      required this.email,
+      this.email,
       required this.role,
       this.phoneNumber,
       final List<ChildProfile>? childProfiles,
@@ -1393,11 +2005,14 @@ class _$UserProfileImpl implements _UserProfile {
       _$$UserProfileImplFromJson(json);
 
   @override
-  final String id;
+  @JsonKey(name: '_id')
+  final String? mongoId;
+  @override
+  final String? id;
   @override
   final String fullName;
   @override
-  final String email;
+  final String? email;
   @override
   final String role;
   @override
@@ -1417,7 +2032,7 @@ class _$UserProfileImpl implements _UserProfile {
 
   @override
   String toString() {
-    return 'UserProfile(id: $id, fullName: $fullName, email: $email, role: $role, phoneNumber: $phoneNumber, childProfiles: $childProfiles, isActive: $isActive)';
+    return 'UserProfile(mongoId: $mongoId, id: $id, fullName: $fullName, email: $email, role: $role, phoneNumber: $phoneNumber, childProfiles: $childProfiles, isActive: $isActive)';
   }
 
   @override
@@ -1425,6 +2040,7 @@ class _$UserProfileImpl implements _UserProfile {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$UserProfileImpl &&
+            (identical(other.mongoId, mongoId) || other.mongoId == mongoId) &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.fullName, fullName) ||
                 other.fullName == fullName) &&
@@ -1442,6 +2058,7 @@ class _$UserProfileImpl implements _UserProfile {
   @override
   int get hashCode => Object.hash(
       runtimeType,
+      mongoId,
       id,
       fullName,
       email,
@@ -1468,9 +2085,10 @@ class _$UserProfileImpl implements _UserProfile {
 
 abstract class _UserProfile implements UserProfile {
   const factory _UserProfile(
-      {required final String id,
+      {@JsonKey(name: '_id') final String? mongoId,
+      final String? id,
       required final String fullName,
-      required final String email,
+      final String? email,
       required final String role,
       final String? phoneNumber,
       final List<ChildProfile>? childProfiles,
@@ -1480,11 +2098,14 @@ abstract class _UserProfile implements UserProfile {
       _$UserProfileImpl.fromJson;
 
   @override
-  String get id;
+  @JsonKey(name: '_id')
+  String? get mongoId;
+  @override
+  String? get id;
   @override
   String get fullName;
   @override
-  String get email;
+  String? get email;
   @override
   String get role;
   @override

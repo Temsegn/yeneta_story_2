@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
 import '../localization/locale_provider.dart';
-import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/subscription/presentation/providers/subscription_providers.dart';
 import 'auth_gate.dart';
 

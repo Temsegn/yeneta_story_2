@@ -71,9 +71,19 @@ class BootstrapService {
         _ref.read(authStateProvider.notifier).state = user;
         _ref.read(guestModeProvider.notifier).state = false;
         await prefs.setGuestMode(false);
+
+        // Validate stored token against the current API (e.g. after deploy or URL change).
+        final authDs = _ref.read(authRemoteDataSourceProvider);
+        await authDs.getProfile();
       } catch (_) {
         await tokenStorage.clearTokens();
+        _ref.read(authStateProvider.notifier).state = null;
+        user = null;
       }
+    } else if (accessToken != null || userData != null) {
+      // Partial/corrupt session — drop tokens so public APIs are not called with a bad Bearer header.
+      await tokenStorage.clearTokens();
+      _ref.read(authStateProvider.notifier).state = null;
     }
 
     AccessInfo? accessInfo;

@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
+import '../../../../core/localization/locale_provider.dart';
+import '../../../../core/utils/ethiopian_phone.dart';
 import '../../data/models/auth_models.dart';
 import '../providers/auth_providers.dart';
-import '../../../../core/localization/locale_provider.dart';
-import '../../../../core/storage/app_preferences.dart';
+import '../widgets/auth_brand.dart';
+import '../widgets/auth_ui.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -16,16 +18,23 @@ class SignInScreen extends ConsumerStatefulWidget {
 
 class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _obscurePassword = true;
   bool _isLoading = false;
 
   @override
   void dispose() {
-    _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  String? _phoneError(String? value, AppLocalizations l10n) {
+    final code = EthiopianPhone.validate(value);
+    if (code == 'required') return l10n.phoneRequired;
+    if (code == 'invalid') return l10n.phoneInvalid;
+    return null;
   }
 
   Future<void> _handleSignIn() async {
@@ -34,10 +43,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     setState(() => _isLoading = true);
 
     try {
+      final phone = EthiopianPhone.normalizeToE164(_phoneController.text)!;
       final authDataSource = ref.read(authRemoteDataSourceProvider);
       final response = await authDataSource.login(
         LoginRequest(
-          email: _emailController.text.trim(),
+          phoneNumber: phone,
           password: _passwordController.text,
         ),
       );
@@ -47,23 +57,11 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       await ref.read(appPreferencesProvider).setGuestMode(false);
 
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(response.message),
-            backgroundColor: Colors.green,
-          ),
-        );
+        showAuthSnackBar(context, response.message);
         context.go('/home');
       }
     } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(e.toString()),
-            backgroundColor: Colors.red,
-          ),
-        );
-      }
+      if (mounted) showAuthSnackBar(context, e.toString(), success: false);
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -79,243 +77,95 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    return Scaffold(
-      body: SafeArea(
-        child: SingleChildScrollView(
-          child: Padding(
-            padding: const EdgeInsets.all(24.0),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const SizedBox(height: 40),
-                  Center(
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20),
-                      child: Image.asset(
-                        'assets/images/app_icon.png',
-                        width: 80,
-                        height: 80,
-                        fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => Container(
-                          width: 80,
-                          height: 80,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [Color(0xFF6B4CE6), Color(0xFF9B6BFF)],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                          child: const Icon(
-                            Icons.auto_stories_rounded,
-                            size: 40,
-                            color: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ),
+    return AuthScreenShell(
+      gradientColors: AuthBrand.signInGradient,
+      heroEmoji: '👋',
+      title: l10n.welcomeBack,
+      subtitle: l10n.signInSubtitle,
+      formChild: Form(
+        key: _formKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            AuthTextField(
+              controller: _phoneController,
+              label: l10n.phoneNumber,
+              hint: l10n.phoneNumberHint,
+              icon: Icons.phone_outlined,
+              keyboardType: TextInputType.phone,
+              textInputAction: TextInputAction.next,
+              validator: (value) => _phoneError(value, l10n),
+            ),
+            const SizedBox(height: 18),
+            AuthTextField(
+              controller: _passwordController,
+              label: l10n.password,
+              hint: l10n.passwordHint,
+              icon: Icons.lock_outline_rounded,
+              obscureText: _obscurePassword,
+              textInputAction: TextInputAction.done,
+              onFieldSubmitted: (_) => _handleSignIn(),
+              suffixIcon: IconButton(
+                icon: Icon(
+                  _obscurePassword
+                      ? Icons.visibility_outlined
+                      : Icons.visibility_off_outlined,
+                  color: AuthBrand.inkMuted,
+                ),
+                onPressed: () =>
+                    setState(() => _obscurePassword = !_obscurePassword),
+              ),
+              validator: (value) {
+                if (value == null || value.isEmpty) return l10n.passwordHint;
+                if (value.length < 6) return l10n.passwordHint;
+                return null;
+              },
+            ),
+            Align(
+              alignment: Alignment.centerRight,
+              child: TextButton(
+                onPressed: () => context.push('/forgot-password'),
+                child: Text(
+                  l10n.forgotPassword,
+                  style: const TextStyle(
+                    color: AuthBrand.purple,
+                    fontWeight: FontWeight.w700,
                   ),
-                  const SizedBox(height: 40),
-                  Text(
-                    l10n.welcomeBack,
-                    style: const TextStyle(
-                      fontSize: 32,
-                      fontWeight: FontWeight.bold,
-                      color: Color(0xFF2D3142),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    l10n.signInSubtitle,
-                    style: const TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                  const SizedBox(height: 40),
-                  _buildTextField(
-                    controller: _emailController,
-                    label: l10n.email,
-                    hint: l10n.emailHint,
-                    icon: Icons.email_outlined,
-                    keyboardType: TextInputType.emailAddress,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return l10n.emailHint;
-                      }
-                      if (!value.contains('@')) return l10n.emailHint;
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 20),
-                  _buildTextField(
-                    controller: _passwordController,
-                    label: l10n.password,
-                    hint: l10n.passwordHint,
-                    icon: Icons.lock_outline,
-                    obscureText: _obscurePassword,
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_outlined
-                            : Icons.visibility_off_outlined,
-                        color: Colors.grey,
-                      ),
-                      onPressed: () =>
-                          setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return l10n.passwordHint;
-                      }
-                      if (value.length < 6) return l10n.passwordHint;
-                      return null;
-                    },
-                  ),
-                  const SizedBox(height: 30),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _isLoading ? null : _handleSignIn,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF6B4CE6),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        elevation: 0,
-                      ),
-                      child: _isLoading
-                          ? const SizedBox(
-                              width: 24,
-                              height: 24,
-                              child: CircularProgressIndicator(
-                                color: Colors.white,
-                                strokeWidth: 2,
-                              ),
-                            )
-                          : Text(
-                              l10n.signIn,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                              ),
-                            ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: OutlinedButton(
-                      onPressed: _continueAsGuest,
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: Color(0xFF6B4CE6), width: 2),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                      ),
-                      child: Text(
-                        l10n.browseAsGuest,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Color(0xFF6B4CE6),
-                        ),
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Center(
-                    child: Text(
-                      l10n.guestModeHint,
-                      style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    children: [
-                      Expanded(child: Divider(color: Colors.grey.shade300)),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16),
-                        child: Text('OR', style: TextStyle(color: Colors.grey.shade500)),
-                      ),
-                      Expanded(child: Divider(color: Colors.grey.shade300)),
-                    ],
-                  ),
-                  const SizedBox(height: 24),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(l10n.noAccount, style: const TextStyle(color: Colors.black54)),
-                      GestureDetector(
-                        onTap: () => context.go('/signup'),
-                        child: Text(
-                          l10n.signUp,
-                          style: const TextStyle(
-                            color: Color(0xFF6B4CE6),
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
+                ),
               ),
             ),
-          ),
+            const SizedBox(height: 8),
+            AuthPrimaryButton(
+              label: l10n.signIn,
+              isLoading: _isLoading,
+              onPressed: _handleSignIn,
+            ),
+            const SizedBox(height: 14),
+            AuthOutlineButton(
+              label: l10n.browseAsGuest,
+              icon: Icons.explore_rounded,
+              onPressed: _continueAsGuest,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.guestModeHint,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontSize: 12,
+                color: AuthBrand.inkMuted.withValues(alpha: 0.85),
+              ),
+            ),
+            const SizedBox(height: 22),
+            const AuthDivider(),
+            const SizedBox(height: 22),
+            AuthLinkRow(
+              prefix: l10n.noAccount,
+              actionLabel: l10n.signUp,
+              onTap: () => context.go('/signup'),
+            ),
+          ],
         ),
       ),
-    );
-  }
-
-  Widget _buildTextField({
-    required TextEditingController controller,
-    required String label,
-    required String hint,
-    required IconData icon,
-    bool obscureText = false,
-    Widget? suffixIcon,
-    TextInputType? keyboardType,
-    String? Function(String?)? validator,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
-            color: Color(0xFF2D3142),
-          ),
-        ),
-        const SizedBox(height: 8),
-        TextFormField(
-          controller: controller,
-          obscureText: obscureText,
-          keyboardType: keyboardType,
-          validator: validator,
-          decoration: InputDecoration(
-            hintText: hint,
-            prefixIcon: Icon(icon, color: const Color(0xFF6B4CE6)),
-            suffixIcon: suffixIcon,
-            filled: true,
-            fillColor: Colors.grey.shade50,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide.none,
-            ),
-            enabledBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: BorderSide(color: Colors.grey.shade200),
-            ),
-            focusedBorder: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(12),
-              borderSide: const BorderSide(color: Color(0xFF6B4CE6), width: 2),
-            ),
-          ),
-        ),
-      ],
     );
   }
 }

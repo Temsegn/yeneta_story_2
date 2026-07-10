@@ -4,9 +4,34 @@ import {
   refreshTokenService,
   getUserProfile,
   updateUserProfile,
+  getForgotPasswordQuestion,
+  resetPasswordWithSecurityAnswer,
 } from "../services/auth_service.js";
 import { logAction } from "../utils/auditLogger.js";
 import { sendWelcomeNotification } from "../services/notification_service.js";
+
+const buildAuthUserPayload = (user, accessToken, refreshToken) => {
+  const childProfiles =
+    user.childProfiles && user.childProfiles.length > 0
+      ? user.childProfiles
+      : [
+          {
+            name: user.fullName,
+            birthdate: null,
+          },
+        ];
+
+  return {
+    id: user._id,
+    fullName: user.fullName,
+    email: user.email || null,
+    role: user.role,
+    phoneNumber: user.phoneNumber,
+    childProfiles,
+    accessToken,
+    refreshToken,
+  };
+};
 
 export const register = async (req, res) => {
   try {
@@ -24,30 +49,13 @@ export const register = async (req, res) => {
       secure: true,
     });
 
-    // If childProfiles is empty, use parent's name as fallback
-    const childProfiles = user.childProfiles && user.childProfiles.length > 0
-      ? user.childProfiles
-      : [{
-          name: user.fullName,
-          birthdate: null
-        }];
-
     res.status(201).json({
       message: "Signup successful",
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        phoneNumber: user.phoneNumber,
-        childProfiles: childProfiles,
-      },
+      user: buildAuthUserPayload(user, accessToken, refreshToken),
     });
 
-    // Send welcome notification
     await sendWelcomeNotification(user._id);
 
-    // Audit Log
     await logAction({
       user: user._id,
       action: "REGISTER",
@@ -76,28 +84,11 @@ export const login = async (req, res) => {
       secure: true,
     });
 
-    // If childProfiles is empty, use parent's name as fallback
-    const childProfiles = user.childProfiles && user.childProfiles.length > 0
-      ? user.childProfiles
-      : [{
-          name: user.fullName,
-          birthdate: null
-        }];
-
     res.status(200).json({
       message: "Login successful",
-      user: {
-        id: user._id,
-        fullName: user.fullName,
-        email: user.email,
-        role: user.role,
-        phoneNumber: user.phoneNumber,
-        childProfiles: childProfiles,
-        accessToken,
-      },
+      user: buildAuthUserPayload(user, accessToken, refreshToken),
     });
 
-    // Audit Log
     await logAction({
       user: user._id,
       action: "LOGIN",
@@ -107,6 +98,31 @@ export const login = async (req, res) => {
     });
   } catch (err) {
     res.status(401).json({ message: err.message });
+  }
+};
+
+export const forgotPassword = async (req, res) => {
+  try {
+    const result = await getForgotPasswordQuestion(req.body.phoneNumber);
+    res.status(200).json(result);
+  } catch (err) {
+    const status = err.code === "SMS_RECOVERY_PENDING" ? 400 : 404;
+    res.status(status).json({ message: err.message, code: err.code });
+  }
+};
+
+export const resetPassword = async (req, res) => {
+  try {
+    const result = await resetPasswordWithSecurityAnswer(req.body);
+    res.status(200).json(result);
+  } catch (err) {
+    const status =
+      err.code === "SMS_RECOVERY_PENDING"
+        ? 400
+        : err.message === "Incorrect security answer"
+          ? 401
+          : 400;
+    res.status(status).json({ message: err.message, code: err.code });
   }
 };
 
@@ -123,7 +139,10 @@ export const logout = async (req, res) => {
 
 export const refreshAccessToken = async (req, res) => {
   try {
-    const token = req.cookies.refreshToken;
+    const token = req.body?.refreshToken || req.cookies.refreshToken;
+    if (!token) {
+      return res.status(401).json({ message: "No refresh token found" });
+    }
 
     const newAccessToken = refreshTokenService(token);
 
@@ -133,7 +152,7 @@ export const refreshAccessToken = async (req, res) => {
       secure: true,
     });
 
-    res.status(200).json({ message: "Access token refreshed" });
+    res.status(200).json({ accessToken: newAccessToken });
   } catch (err) {
     res.status(403).json({ message: err.message });
   }
@@ -157,12 +176,12 @@ export const updateProfile = async (req, res) => {
       user: {
         id: user._id,
         fullName: user.fullName,
-        email: user.email,
+        email: user.email || null,
+        phoneNumber: user.phoneNumber,
         role: user.role,
       },
     });
 
-    // Audit Log
     await logAction({
       user: req.user._id,
       action: "UPDATE_PROFILE",

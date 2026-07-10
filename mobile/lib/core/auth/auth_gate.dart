@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
 import '../localization/locale_provider.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
+import 'auth_session.dart';
 
 /// Prompts guest users to sign in or register before protected actions
 /// (payment, profile, child profiles, etc.).
@@ -16,13 +17,20 @@ class AuthGate {
     return guest || user == null;
   }
 
-  /// Returns true if the user is authenticated; otherwise shows a dialog.
+  /// Returns true if the user has a stored access token; otherwise shows a dialog.
   static Future<bool> requireAuth(
     BuildContext context,
     WidgetRef ref, {
     String? message,
   }) async {
-    if (!isGuest(ref)) return true;
+    final hasToken = await AuthSession.hasStoredAccessToken(ref);
+    if (!isGuest(ref) && hasToken) return true;
+
+    // UI shows logged-in but no JWT in storage (expired session or old API).
+    if (!isGuest(ref) && !hasToken) {
+      await AuthSession.clear(ref);
+    }
+    if (!context.mounted) return false;
 
     final l10n = AppLocalizations.of(context);
     final result = await showDialog<bool>(

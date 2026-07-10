@@ -15,13 +15,19 @@ class AppLocalizationsEn extends AppLocalizations {
   String get welcomeBack => 'Welcome Back!';
 
   @override
-  String get signInSubtitle => 'Sign in to continue your learning journey';
+  String get signInSubtitle => 'Sign in with your phone number to continue';
 
   @override
   String get email => 'Email';
 
   @override
+  String get emailOptional => 'Email (optional)';
+
+  @override
   String get emailHint => 'Enter your email';
+
+  @override
+  String get emailInvalid => 'Please enter a valid email';
 
   @override
   String get password => 'Password';
@@ -30,10 +36,103 @@ class AppLocalizationsEn extends AppLocalizations {
   String get passwordHint => 'Enter your password';
 
   @override
+  String get phoneRequired => 'Phone number is required';
+
+  @override
+  String get phoneInvalid =>
+      'Enter a valid Ethiopian mobile (9 digits starting with 9)';
+
+  @override
+  String get forgotPassword => 'Forgot password?';
+
+  @override
+  String get forgotPasswordTitle => 'Reset Password';
+
+  @override
+  String get forgotPasswordSubtitle => 'Enter your phone number to continue';
+
+  @override
+  String get continueLabel => 'Continue';
+
+  @override
+  String get securityQuestion => 'Security question';
+
+  @override
+  String get securityQuestionHint => 'e.g. What is your pet\'s name?';
+
+  @override
+  String get securityAnswer => 'Security answer';
+
+  @override
+  String get securityAnswerHint => 'Your secret answer';
+
+  @override
+  String get securityQuestionRequired => 'Please enter a security question';
+
+  @override
+  String get securityAnswerRequired => 'Please enter a security answer';
+
+  @override
+  String get newPassword => 'New password';
+
+  @override
+  String get newPasswordHint => 'Enter a new password';
+
+  @override
+  String get resetPassword => 'Reset password';
+
+  @override
+  String get passwordResetSuccess => 'Password updated! You can sign in now.';
+
+  @override
+  String get smsRecoveryComingSoon =>
+      'SMS recovery is coming soon. Add an email to your account to reset with a security question.';
+
+  @override
   String get signIn => 'Sign In';
 
   @override
   String get signUp => 'Sign Up';
+
+  @override
+  String get createAccountTitle => 'Create Account';
+
+  @override
+  String get createAccountSubtitle =>
+      'Join Yeneta Story and start your adventure!';
+
+  @override
+  String get fullName => 'Full Name';
+
+  @override
+  String get fullNameHint => 'Enter your full name';
+
+  @override
+  String get phoneNumber => 'Phone Number';
+
+  @override
+  String get phoneNumberHint => '+251912345678';
+
+  @override
+  String get createPassword => 'Password';
+
+  @override
+  String get createPasswordHint => 'Create a password';
+
+  @override
+  String get confirmPassword => 'Confirm Password';
+
+  @override
+  String get confirmPasswordHint => 'Re-enter your password';
+
+  @override
+  String get acceptTerms => 'I agree to the Terms & Conditions';
+
+  @override
+  String get acceptTermsRequired => 'Please accept the terms and conditions';
+
+  @override
+  String get alreadyHaveAccount => 'Already have an account? ';
 
   @override
   String get noAccount => 'Don\'t have an account?';
@@ -135,6 +234,9 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get bootstrapReady => 'Ready!';
+
+  @override
+  String get splashTagline => 'Stories, videos & fun adventures!';
 
   @override
   String get updateRequiredTitle => 'Update Required';

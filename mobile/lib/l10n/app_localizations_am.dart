@@ -15,13 +15,19 @@ class AppLocalizationsAm extends AppLocalizations {
   String get welcomeBack => 'እንኳን ደህና መጡ!';
 
   @override
-  String get signInSubtitle => 'መማርዎን ለመቀጠል ይግቡ';
+  String get signInSubtitle => 'በስልክ ቁጥርዎ ይግቡ እና ይቀጥሉ';
 
   @override
   String get email => 'ኢሜይል';
 
   @override
+  String get emailOptional => 'ኢሜይል (አማራጭ)';
+
+  @override
   String get emailHint => 'ኢሜይልዎን ያስገቡ';
+
+  @override
+  String get emailInvalid => 'እባክዎ ትክክለኛ ኢሜይል ያስገቡ';
 
   @override
   String get password => 'የይለፍ ቃል';
@@ -30,10 +36,101 @@ class AppLocalizationsAm extends AppLocalizations {
   String get passwordHint => 'የይለፍ ቃልዎን ያስገቡ';
 
   @override
+  String get phoneRequired => 'ስልክ ቁጥር ያስፈልጋል';
+
+  @override
+  String get phoneInvalid => 'ትክክለኛ የኢትዮጵያ ሞባይል ያስገቡ (በ9 የሚጀምር 9 አሃዝ)';
+
+  @override
+  String get forgotPassword => 'የይለፍ ቃል ረሱ?';
+
+  @override
+  String get forgotPasswordTitle => 'የይለፍ ቃል ዳግም ያስጀምሩ';
+
+  @override
+  String get forgotPasswordSubtitle => 'ለመቀጠል ስልክ ቁጥርዎን ያስገቡ';
+
+  @override
+  String get continueLabel => 'ቀጥል';
+
+  @override
+  String get securityQuestion => 'የደህንነት ጥያቄ';
+
+  @override
+  String get securityQuestionHint => 'ለምሳሌ የቤት እንስሳዎ ስም ምንድን ነው?';
+
+  @override
+  String get securityAnswer => 'የደህንነት መልስ';
+
+  @override
+  String get securityAnswerHint => 'ሚስጥራዊ መልስዎ';
+
+  @override
+  String get securityQuestionRequired => 'እባክዎ የደህንነት ጥያቄ ያስገቡ';
+
+  @override
+  String get securityAnswerRequired => 'እባክዎ የደህንነት መልስ ያስገቡ';
+
+  @override
+  String get newPassword => 'አዲስ የይለፍ ቃል';
+
+  @override
+  String get newPasswordHint => 'አዲስ የይለፍ ቃል ያስገቡ';
+
+  @override
+  String get resetPassword => 'የይለፍ ቃል ዳግም ያስጀምሩ';
+
+  @override
+  String get passwordResetSuccess => 'የይለፍ ቃል ተዘምኗል! አሁን መግባት ይችላሉ።';
+
+  @override
+  String get smsRecoveryComingSoon =>
+      'በSMS መልሶ ማግኘት በቅርብ ይመጣል። በደህንነት ጥያቄ ለመቀየር ኢሜይል ያክሉ።';
+
+  @override
   String get signIn => 'ግባ';
 
   @override
   String get signUp => 'ተመዝገብ';
+
+  @override
+  String get createAccountTitle => 'መለያ ይፍጠሩ';
+
+  @override
+  String get createAccountSubtitle => 'የኔታ ታሪክን ይቀላቀሉ እና ጀምርዎን ይጀምሩ!';
+
+  @override
+  String get fullName => 'ሙሉ ስም';
+
+  @override
+  String get fullNameHint => 'ሙሉ ስምዎን ያስገቡ';
+
+  @override
+  String get phoneNumber => 'ስልክ ቁጥር';
+
+  @override
+  String get phoneNumberHint => '+251912345678';
+
+  @override
+  String get createPassword => 'የይለፍ ቃል';
+
+  @override
+  String get createPasswordHint => 'የይለፍ ቃል ይፍጠሩ';
+
+  @override
+  String get confirmPassword => 'የይለፍ ቃል ያረጋግጡ';
+
+  @override
+  String get confirmPasswordHint => 'የይለፍ ቃልዎን እንደገና ያስገቡ';
+
+  @override
+  String get acceptTerms => 'ውሎችን እና ሁኔታዎችን እቀበላለሁ';
+
+  @override
+  String get acceptTermsRequired => 'እባክዎ ውሎችን እና ሁኔታዎችን ይቀበሉ';
+
+  @override
+  String get alreadyHaveAccount => 'መለያ አለዎት? ';
 
   @override
   String get noAccount => 'መለያ የለዎትም?';
@@ -133,6 +230,9 @@ class AppLocalizationsAm extends AppLocalizations {
 
   @override
   String get bootstrapReady => 'ተዘጋጅቷል!';
+
+  @override
+  String get splashTagline => 'ታሪኮች፣ ቪዲዮዎች እና አስደሳች ጀብዱዎች!';
 
   @override
   String get updateRequiredTitle => 'ዝመና ያስፈልጋል';

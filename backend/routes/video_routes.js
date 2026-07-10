@@ -61,7 +61,7 @@ const router = express.Router();
  *       500:
  *         description: Server error
  */
-router.get("/",protect, getAllVideos);
+router.get("/", getAllVideos);
 
 /**
  * @swagger

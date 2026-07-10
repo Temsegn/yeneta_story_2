@@ -113,7 +113,7 @@ abstract class AppLocalizations {
   /// No description provided for @signInSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Sign in to continue your learning journey'**
+  /// **'Sign in with your phone number to continue'**
   String get signInSubtitle;
 
   /// No description provided for @email.
@@ -122,11 +122,23 @@ abstract class AppLocalizations {
   /// **'Email'**
   String get email;
 
+  /// No description provided for @emailOptional.
+  ///
+  /// In en, this message translates to:
+  /// **'Email (optional)'**
+  String get emailOptional;
+
   /// No description provided for @emailHint.
   ///
   /// In en, this message translates to:
   /// **'Enter your email'**
   String get emailHint;
+
+  /// No description provided for @emailInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a valid email'**
+  String get emailInvalid;
 
   /// No description provided for @password.
   ///
@@ -140,6 +152,108 @@ abstract class AppLocalizations {
   /// **'Enter your password'**
   String get passwordHint;
 
+  /// No description provided for @phoneRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone number is required'**
+  String get phoneRequired;
+
+  /// No description provided for @phoneInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid Ethiopian mobile (9 digits starting with 9)'**
+  String get phoneInvalid;
+
+  /// No description provided for @forgotPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Forgot password?'**
+  String get forgotPassword;
+
+  /// No description provided for @forgotPasswordTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset Password'**
+  String get forgotPasswordTitle;
+
+  /// No description provided for @forgotPasswordSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your phone number to continue'**
+  String get forgotPasswordSubtitle;
+
+  /// No description provided for @continueLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueLabel;
+
+  /// No description provided for @securityQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Security question'**
+  String get securityQuestion;
+
+  /// No description provided for @securityQuestionHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. What is your pet\'s name?'**
+  String get securityQuestionHint;
+
+  /// No description provided for @securityAnswer.
+  ///
+  /// In en, this message translates to:
+  /// **'Security answer'**
+  String get securityAnswer;
+
+  /// No description provided for @securityAnswerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Your secret answer'**
+  String get securityAnswerHint;
+
+  /// No description provided for @securityQuestionRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a security question'**
+  String get securityQuestionRequired;
+
+  /// No description provided for @securityAnswerRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a security answer'**
+  String get securityAnswerRequired;
+
+  /// No description provided for @newPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'New password'**
+  String get newPassword;
+
+  /// No description provided for @newPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a new password'**
+  String get newPasswordHint;
+
+  /// No description provided for @resetPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Reset password'**
+  String get resetPassword;
+
+  /// No description provided for @passwordResetSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Password updated! You can sign in now.'**
+  String get passwordResetSuccess;
+
+  /// No description provided for @smsRecoveryComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'SMS recovery is coming soon. Add an email to your account to reset with a security question.'**
+  String get smsRecoveryComingSoon;
+
   /// No description provided for @signIn.
   ///
   /// In en, this message translates to:
@@ -151,6 +265,84 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sign Up'**
   String get signUp;
+
+  /// No description provided for @createAccountTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Create Account'**
+  String get createAccountTitle;
+
+  /// No description provided for @createAccountSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Join Yeneta Story and start your adventure!'**
+  String get createAccountSubtitle;
+
+  /// No description provided for @fullName.
+  ///
+  /// In en, this message translates to:
+  /// **'Full Name'**
+  String get fullName;
+
+  /// No description provided for @fullNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter your full name'**
+  String get fullNameHint;
+
+  /// No description provided for @phoneNumber.
+  ///
+  /// In en, this message translates to:
+  /// **'Phone Number'**
+  String get phoneNumber;
+
+  /// No description provided for @phoneNumberHint.
+  ///
+  /// In en, this message translates to:
+  /// **'+251912345678'**
+  String get phoneNumberHint;
+
+  /// No description provided for @createPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Password'**
+  String get createPassword;
+
+  /// No description provided for @createPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Create a password'**
+  String get createPasswordHint;
+
+  /// No description provided for @confirmPassword.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Password'**
+  String get confirmPassword;
+
+  /// No description provided for @confirmPasswordHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Re-enter your password'**
+  String get confirmPasswordHint;
+
+  /// No description provided for @acceptTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'I agree to the Terms & Conditions'**
+  String get acceptTerms;
+
+  /// No description provided for @acceptTermsRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'Please accept the terms and conditions'**
+  String get acceptTermsRequired;
+
+  /// No description provided for @alreadyHaveAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Already have an account? '**
+  String get alreadyHaveAccount;
 
   /// No description provided for @noAccount.
   ///
@@ -337,6 +529,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Ready!'**
   String get bootstrapReady;
+
+  /// No description provided for @splashTagline.
+  ///
+  /// In en, this message translates to:
+  /// **'Stories, videos & fun adventures!'**
+  String get splashTagline;
 
   /// No description provided for @updateRequiredTitle.
   ///

@@ -9,6 +9,8 @@ abstract class AuthRemoteDataSource {
   Future<AuthResponse> login(LoginRequest request);
   Future<UserProfile> getProfile();
   Future<UserProfile> updateProfile(UpdateProfileRequest request);
+  Future<ForgotPasswordResponse> requestPasswordReset(ForgotPasswordRequest request);
+  Future<void> resetPassword(ResetPasswordRequest request);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -17,6 +19,33 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
   AuthRemoteDataSourceImpl(this._dio, this._tokenStorage);
 
+  Future<void> _persistSession(Map<String, dynamic> data) async {
+    final userJson = data['user'];
+    if (userJson is! Map<String, dynamic>) {
+      throw ApiException('Invalid auth response from server.');
+    }
+
+    final accessToken = userJson['accessToken'] as String?;
+    if (accessToken == null || accessToken.isEmpty) {
+      throw ApiException(
+        'Sign-in succeeded but no access token was returned. '
+        'Deploy the latest backend, then sign in again.',
+      );
+    }
+
+    await _tokenStorage.saveAccessToken(accessToken);
+
+    final refreshToken = userJson['refreshToken'] as String?;
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      await _tokenStorage.saveRefreshToken(refreshToken);
+    }
+
+    final userForStorage = Map<String, dynamic>.from(userJson);
+    userForStorage.remove('accessToken');
+    userForStorage.remove('refreshToken');
+    await _tokenStorage.saveUserData(userForStorage);
+  }
+
   @override
   Future<AuthResponse> register(RegisterRequest request) async {
     try {
@@ -24,19 +53,10 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '${ApiConfig.auth}/register',
         data: request.toJson(),
       );
-      
+
       final authResponse = AuthResponse.fromJson(response.data);
-      
-      // Save tokens and user data for persistent session
-      if (response.data['user']?['accessToken'] != null) {
-        await _tokenStorage.saveAccessToken(response.data['user']['accessToken']);
-      }
-      if (response.data['user']?['refreshToken'] != null) {
-        await _tokenStorage.saveRefreshToken(response.data['user']['refreshToken']);
-      }
-      // Save user data
-      await _tokenStorage.saveUserData(response.data['user']);
-      
+      await _persistSession(response.data as Map<String, dynamic>);
+
       return authResponse;
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
@@ -50,20 +70,38 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '${ApiConfig.auth}/login',
         data: request.toJson(),
       );
-      
+
       final authResponse = AuthResponse.fromJson(response.data);
-      
-      // Save tokens and user data for persistent session
-      if (response.data['user']?['accessToken'] != null) {
-        await _tokenStorage.saveAccessToken(response.data['user']['accessToken']);
-      }
-      if (response.data['user']?['refreshToken'] != null) {
-        await _tokenStorage.saveRefreshToken(response.data['user']['refreshToken']);
-      }
-      // Save user data
-      await _tokenStorage.saveUserData(response.data['user']);
-      
+      await _persistSession(response.data as Map<String, dynamic>);
+
       return authResponse;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  @override
+  Future<ForgotPasswordResponse> requestPasswordReset(
+    ForgotPasswordRequest request,
+  ) async {
+    try {
+      final response = await _dio.post(
+        '${ApiConfig.auth}/forgot-password',
+        data: request.toJson(),
+      );
+      return ForgotPasswordResponse.fromJson(response.data);
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
+    }
+  }
+
+  @override
+  Future<void> resetPassword(ResetPasswordRequest request) async {
+    try {
+      await _dio.post(
+        '${ApiConfig.auth}/reset-password',
+        data: request.toJson(),
+      );
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);
     }
@@ -86,6 +124,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         '${ApiConfig.auth}/profile',
         data: request.toJson(),
       );
+      final data = response.data;
+      if (data is Map && data['user'] is Map) {
+        return UserProfile.fromJson(
+          Map<String, dynamic>.from(data['user'] as Map),
+        );
+      }
       return UserProfile.fromJson(response.data);
     } on DioException catch (e) {
       throw ApiException.fromDioError(e);

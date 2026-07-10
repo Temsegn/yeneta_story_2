@@ -34,6 +34,8 @@ const seedAdmin = async () => {
       role: "admin",
       isActive: true,
       childProfiles: [],
+      securityQuestion: "What is the admin recovery word?",
+      securityAnswerHash: await bcrypt.hash("yeneta", 10),
     });
 
     console.log("✅ Admin user created successfully!");

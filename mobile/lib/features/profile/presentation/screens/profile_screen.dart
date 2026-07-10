@@ -58,7 +58,12 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
       body: SingleChildScrollView(
         child: Column(
           children: [
-            _buildProfileHeader(user?.fullName ?? 'User', user?.email ?? ''),
+            _buildProfileHeader(
+              user?.fullName ?? 'User',
+              (user?.email != null && user!.email!.isNotEmpty)
+                  ? user.email!
+                  : (user?.phoneNumber ?? ''),
+            ),
             if (accessInfo != null) _buildSubscriptionCard(accessInfo),
             const SizedBox(height: 16),
             _buildMenuSection(context, ref),

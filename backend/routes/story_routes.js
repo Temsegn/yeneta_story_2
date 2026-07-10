@@ -49,7 +49,7 @@ const router= express.Router();
  *                 currentPage:
  *                   type: integer
  */
-router.get("/",protect, getAllStories);
+router.get("/", getAllStories);
 
 /**
  * @swagger

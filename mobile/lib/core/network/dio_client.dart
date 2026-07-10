@@ -2,11 +2,15 @@ import 'package:dio/dio.dart';
 import 'api_config.dart';
 import '../storage/token_storage.dart';
 
+typedef SessionExpiredCallback = void Function();
+
 class DioClient {
   late final Dio _dio;
   final TokenStorage _tokenStorage;
+  final SessionExpiredCallback? _onSessionExpired;
 
-  DioClient(this._tokenStorage) {
+  DioClient(this._tokenStorage, {SessionExpiredCallback? onSessionExpired})
+      : _onSessionExpired = onSessionExpired {
     _dio = Dio(
       BaseOptions(
         baseUrl: ApiConfig.baseUrl,
@@ -30,12 +34,11 @@ class DioClient {
         },
         onError: (error, handler) async {
           if (error.response?.statusCode == 401) {
-            // Token expired, try refresh
             final refreshed = await _refreshToken();
             if (refreshed) {
-              // Retry original request
               return handler.resolve(await _retry(error.requestOptions));
             }
+            _onSessionExpired?.call();
           }
           return handler.next(error);
         },
@@ -48,7 +51,15 @@ class DioClient {
       final refreshToken = await _tokenStorage.getRefreshToken();
       if (refreshToken == null) return false;
 
-      final response = await _dio.post(
+      final response = await Dio(
+        BaseOptions(
+          baseUrl: ApiConfig.baseUrl,
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'application/json',
+          },
+        ),
+      ).post(
         '${ApiConfig.auth}/refresh',
         data: {'refreshToken': refreshToken},
       );

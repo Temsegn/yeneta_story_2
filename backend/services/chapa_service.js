@@ -148,7 +148,7 @@ export async function checkoutSubscription(userId, planId) {
   const { firstName, lastName } = splitName(user.fullName);
   const callbackUrl =
     process.env.CHAPA_CALLBACK_URL ||
-    `${process.env.CLIENT_URL || "https://yeneta-story-2.onrender.com"}/api/v1/payments/chapa/webhook`;
+    `${process.env.CLIENT_URL || "https://yeneta-zq3w.onrender.com"}/api/v1/payments/chapa/webhook`;
   const returnUrl =
     process.env.CHAPA_RETURN_URL ||
     process.env.FRONTEND_URL ||

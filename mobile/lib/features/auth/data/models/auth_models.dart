@@ -1,5 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+// Freezed places JsonKey on factory params; analyzer warning is expected.
+// ignore_for_file: invalid_annotation_target
+
 part 'auth_models.freezed.dart';
 part 'auth_models.g.dart';
 
@@ -7,9 +10,11 @@ part 'auth_models.g.dart';
 class RegisterRequest with _$RegisterRequest {
   const factory RegisterRequest({
     required String fullName,
-    required String email,
+    @JsonKey(includeIfNull: false) String? email,
     required String password,
     required String phoneNumber,
+    required String securityQuestion,
+    required String securityAnswer,
   }) = _RegisterRequest;
 
   factory RegisterRequest.fromJson(Map<String, dynamic> json) =>
@@ -19,7 +24,7 @@ class RegisterRequest with _$RegisterRequest {
 @freezed
 class LoginRequest with _$LoginRequest {
   const factory LoginRequest({
-    required String email,
+    required String phoneNumber,
     required String password,
   }) = _LoginRequest;
 
@@ -28,10 +33,44 @@ class LoginRequest with _$LoginRequest {
 }
 
 @freezed
+class ForgotPasswordRequest with _$ForgotPasswordRequest {
+  const factory ForgotPasswordRequest({
+    required String phoneNumber,
+  }) = _ForgotPasswordRequest;
+
+  factory ForgotPasswordRequest.fromJson(Map<String, dynamic> json) =>
+      _$ForgotPasswordRequestFromJson(json);
+}
+
+@freezed
+class ForgotPasswordResponse with _$ForgotPasswordResponse {
+  const factory ForgotPasswordResponse({
+    required String phoneNumber,
+    required String securityQuestion,
+  }) = _ForgotPasswordResponse;
+
+  factory ForgotPasswordResponse.fromJson(Map<String, dynamic> json) =>
+      _$ForgotPasswordResponseFromJson(json);
+}
+
+@freezed
+class ResetPasswordRequest with _$ResetPasswordRequest {
+  const factory ResetPasswordRequest({
+    required String phoneNumber,
+    required String securityAnswer,
+    required String newPassword,
+  }) = _ResetPasswordRequest;
+
+  factory ResetPasswordRequest.fromJson(Map<String, dynamic> json) =>
+      _$ResetPasswordRequestFromJson(json);
+}
+
+@freezed
 class UpdateProfileRequest with _$UpdateProfileRequest {
   const factory UpdateProfileRequest({
     String? fullName,
     String? email,
+    String? phoneNumber,
   }) = _UpdateProfileRequest;
 
   factory UpdateProfileRequest.fromJson(Map<String, dynamic> json) =>
@@ -54,7 +93,7 @@ class UserData with _$UserData {
   const factory UserData({
     required String id,
     required String fullName,
-    required String email,
+    String? email,
     required String role,
     String? phoneNumber,
     List<ChildProfile>? childProfiles,
@@ -79,9 +118,10 @@ class ChildProfile with _$ChildProfile {
 @freezed
 class UserProfile with _$UserProfile {
   const factory UserProfile({
-    required String id,
+    @JsonKey(name: '_id') String? mongoId,
+    String? id,
     required String fullName,
-    required String email,
+    String? email,
     required String role,
     String? phoneNumber,
     List<ChildProfile>? childProfiles,

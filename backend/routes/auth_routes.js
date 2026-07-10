@@ -2,8 +2,11 @@ import express from "express";
 import {
   register,
   login,
+  refreshAccessToken,
   getProfile,
   updateProfile,
+  forgotPassword,
+  resetPassword,
 } from "../controllers/auth_controllers.js";
 
 import { protect } from "../middlewares/auth_middlewares.js";
@@ -12,6 +15,8 @@ import {
   registerValidator,
   loginValidator,
   updateProfileValidator,
+  forgotPasswordValidator,
+  resetPasswordValidator,
 } from "../middlewares/auth_validator_middlewares.js";
 
 const router = express.Router();
@@ -20,29 +25,30 @@ const router = express.Router();
  * @swagger
  * /api/v1/auth/register:
  *   post:
- *     summary: Register a new user
+ *     summary: Register a new user (phone + password; email optional)
  *     tags: [Auth]
  */
-router.post(
-  "/register",
-  registerValidator,
-  validate,
-  register
-);
+router.post("/register", registerValidator, validate, register);
 
 /**
  * @swagger
  * /api/v1/auth/login:
  *   post:
- *     summary: Login user
+ *     summary: Login with phone number and password
  *     tags: [Auth]
  */
+router.post("/login", loginValidator, validate, login);
+
+router.post("/refresh", refreshAccessToken);
+
 router.post(
-  "/login",
-  loginValidator,
+  "/forgot-password",
+  forgotPasswordValidator,
   validate,
-  login
+  forgotPassword
 );
+
+router.post("/reset-password", resetPasswordValidator, validate, resetPassword);
 
 /**
  * @swagger

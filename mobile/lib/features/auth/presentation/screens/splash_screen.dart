@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
 import '../../../../core/bootstrap/bootstrap_service.dart';
 import '../../../../core/widgets/language_switcher.dart';
+import '../widgets/kids_welcome_background.dart';
 
 class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
@@ -13,53 +14,66 @@ class SplashScreen extends ConsumerStatefulWidget {
 }
 
 class _SplashScreenState extends ConsumerState<SplashScreen>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
+    with TickerProviderStateMixin {
+  late AnimationController _introController;
+  late AnimationController _pulseController;
   late Animation<double> _scaleAnimation;
   late Animation<double> _fadeAnimation;
-  String _statusText = '';
+  late Animation<double> _slideAnimation;
   double _progress = 0;
+
+  static const _gradient = [
+    Color(0xFFFF9A56),
+    Color(0xFFFF6B9D),
+    Color(0xFF845EC2),
+  ];
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1800),
+    _introController = AnimationController(
+      duration: const Duration(milliseconds: 1400),
       vsync: this,
     );
-    _scaleAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.elasticOut),
+    _pulseController = AnimationController(
+      duration: const Duration(milliseconds: 1800),
+      vsync: this,
+    )..repeat(reverse: true);
+
+    _scaleAnimation = Tween<double>(begin: 0.4, end: 1.0).animate(
+      CurvedAnimation(parent: _introController, curve: Curves.elasticOut),
     );
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
-      CurvedAnimation(parent: _controller, curve: Curves.easeIn),
+      CurvedAnimation(
+        parent: _introController,
+        curve: const Interval(0.0, 0.7, curve: Curves.easeOut),
+      ),
     );
-    _controller.forward();
+    _slideAnimation = Tween<double>(begin: 24, end: 0).animate(
+      CurvedAnimation(
+        parent: _introController,
+        curve: const Interval(0.2, 1.0, curve: Curves.easeOutCubic),
+      ),
+    );
+
+    _introController.forward();
     _runBootstrap();
   }
 
   Future<void> _runBootstrap() async {
     final bootstrap = ref.read(bootstrapServiceProvider);
-
-    setState(() {
-      _progress = 0.1;
-    });
-
     bootstrap.warmUpBackend();
 
-    await Future.delayed(const Duration(milliseconds: 600));
+    setState(() => _progress = 0.15);
+    await Future.delayed(const Duration(milliseconds: 500));
     if (!mounted) return;
-    setState(() {
-      _progress = 0.35;
-    });
+    setState(() => _progress = 0.4);
 
-    await Future.delayed(const Duration(milliseconds: 400));
+    await Future.delayed(const Duration(milliseconds: 350));
     if (!mounted) return;
-    setState(() {
-      _progress = 0.6;
-    });
+    setState(() => _progress = 0.65);
 
     final result = await bootstrap.run();
-
     if (!mounted) return;
 
     if (result.step == BootstrapStep.updateRequired) {
@@ -67,18 +81,12 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       return;
     }
 
-    setState(() {
-      _progress = 0.9;
-    });
-
-    await Future.delayed(const Duration(milliseconds: 500));
+    setState(() => _progress = 0.9);
+    await Future.delayed(const Duration(milliseconds: 450));
     if (!mounted) return;
 
-    setState(() {
-      _progress = 1.0;
-    });
-
-    await Future.delayed(const Duration(milliseconds: 300));
+    setState(() => _progress = 1.0);
+    await Future.delayed(const Duration(milliseconds: 350));
     if (mounted && result.nextRoute != null) {
       context.go(result.nextRoute!);
     }
@@ -89,11 +97,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
       context: context,
       barrierDismissible: false,
       builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(24)),
         title: Text(l10n.updateRequiredTitle),
         content: Text(l10n.updateRequiredMessage),
         actions: [
           ElevatedButton(
             onPressed: () {},
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFFF9A56),
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(14),
+              ),
+            ),
             child: Text(l10n.updateNow),
           ),
         ],
@@ -101,9 +117,18 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
     );
   }
 
+  String _statusForProgress(AppLocalizations l10n, double p) {
+    if (p < 0.35) return l10n.bootstrapLoading;
+    if (p < 0.6) return l10n.bootstrapCheckingVersion;
+    if (p < 0.9) return l10n.bootstrapCheckingAuth;
+    if (p < 1.0) return l10n.bootstrapCheckingPayment;
+    return l10n.bootstrapReady;
+  }
+
   @override
   void dispose() {
-    _controller.dispose();
+    _introController.dispose();
+    _pulseController.dispose();
     super.dispose();
   }
 
@@ -111,27 +136,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    String statusForProgress(double p) {
-      if (p < 0.35) return l10n.bootstrapLoading;
-      if (p < 0.6) return l10n.bootstrapCheckingVersion;
-      if (p < 0.9) return l10n.bootstrapCheckingAuth;
-      if (p < 1.0) return l10n.bootstrapCheckingPayment;
-      return l10n.bootstrapReady;
-    }
-
     return Scaffold(
-      body: Container(
-        decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Color(0xFF6B4CE6),
-              Color(0xFF9B6BFF),
-              Color(0xFFFF6B9D),
-            ],
-          ),
-        ),
+      body: KidsWelcomeBackground(
+        gradientColors: _gradient,
         child: SafeArea(
           child: Stack(
             children: [
@@ -141,100 +148,168 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
                 child: const LanguageSwitcher(onDarkBackground: true),
               ),
               Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ScaleTransition(
-                      scale: _scaleAnimation,
-                      child: FadeTransition(
-                        opacity: _fadeAnimation,
-                        child: Container(
-                          width: 130,
-                          height: 130,
-                          decoration: BoxDecoration(
-                            borderRadius: BorderRadius.circular(32),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withValues(alpha: 0.25),
-                                blurRadius: 30,
-                                offset: const Offset(0, 12),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 32),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      AnimatedBuilder(
+                        animation: _pulseController,
+                        builder: (context, child) {
+                          final pulse = 1.0 + (_pulseController.value * 0.06);
+                          return Transform.scale(
+                            scale: _scaleAnimation.value * pulse,
+                            child: child,
+                          );
+                        },
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Stack(
+                            alignment: Alignment.center,
+                            children: [
+                              Container(
+                                width: 168,
+                                height: 168,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: Colors.white.withValues(alpha: 0.18),
+                                ),
+                              ),
+                              Container(
+                                width: 148,
+                                height: 148,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(40),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.7),
+                                    width: 4,
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withValues(alpha: 0.2),
+                                      blurRadius: 28,
+                                      offset: const Offset(0, 14),
+                                    ),
+                                  ],
+                                ),
+                                child: ClipRRect(
+                                  borderRadius: BorderRadius.circular(36),
+                                  child: Image.asset(
+                                    'assets/images/app_icon.png',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (_, __, ___) => Container(
+                                      color: Colors.white,
+                                      child: const Icon(
+                                        Icons.auto_stories_rounded,
+                                        size: 72,
+                                        color: Color(0xFFFF9A56),
+                                      ),
+                                    ),
+                                  ),
+                                ),
                               ),
                             ],
                           ),
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(32),
-                            child: Image.asset(
-                              'assets/images/app_icon.png',
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Container(
+                        ),
+                      ),
+                      const SizedBox(height: 32),
+                      AnimatedBuilder(
+                        animation: _introController,
+                        builder: (context, child) {
+                          return Transform.translate(
+                            offset: Offset(0, _slideAnimation.value),
+                            child: Opacity(
+                              opacity: _fadeAnimation.value,
+                              child: child,
+                            ),
+                          );
+                        },
+                        child: Column(
+                          children: [
+                            Text(
+                              l10n.appTitle,
+                              style: const TextStyle(
+                                fontSize: 40,
+                                fontWeight: FontWeight.w900,
                                 color: Colors.white,
-                                child: const Icon(
-                                  Icons.auto_stories_rounded,
-                                  size: 70,
-                                  color: Color(0xFF6B4CE6),
+                                letterSpacing: 0.5,
+                                height: 1.1,
+                                shadows: [
+                                  Shadow(
+                                    color: Color(0x66000000),
+                                    blurRadius: 12,
+                                    offset: Offset(0, 4),
+                                  ),
+                                ],
+                              ),
+                              textAlign: TextAlign.center,
+                            ),
+                            const SizedBox(height: 12),
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 18,
+                                vertical: 8,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(24),
+                                border: Border.all(
+                                  color: Colors.white.withValues(alpha: 0.35),
                                 ),
                               ),
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 28),
-                    FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Text(
-                        l10n.appTitle,
-                        style: const TextStyle(
-                          fontSize: 38,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          letterSpacing: 1.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Text(
-                        'Learn & Grow Together',
-                        style: TextStyle(
-                          fontSize: 15,
-                          color: Colors.white.withValues(alpha: 0.85),
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 48),
-                    SizedBox(
-                      width: 220,
-                      child: Column(
-                        children: [
-                          ClipRRect(
-                            borderRadius: BorderRadius.circular(8),
-                            child: LinearProgressIndicator(
-                              value: _progress > 0 ? _progress : null,
-                              minHeight: 4,
-                              backgroundColor: Colors.white24,
-                              valueColor: const AlwaysStoppedAnimation<Color>(
-                                Colors.white,
+                              child: Text(
+                                l10n.splashTagline,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.w600,
+                                  color: Colors.white.withValues(alpha: 0.95),
+                                ),
+                                textAlign: TextAlign.center,
                               ),
                             ),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _statusText.isEmpty
-                                ? statusForProgress(_progress)
-                                : _statusText,
-                            style: TextStyle(
-                              fontSize: 13,
-                              color: Colors.white.withValues(alpha: 0.9),
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ],
+                          ],
+                        ),
                       ),
+                      const SizedBox(height: 20),
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: ['📚', '🎬', '🎮', '🦁'].map((emoji) {
+                            return Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 6),
+                              child: Text(emoji, style: const TextStyle(fontSize: 28)),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                      const SizedBox(height: 44),
+                      FadeTransition(
+                        opacity: _fadeAnimation,
+                        child: KidsLoadingBar(
+                          progress: _progress,
+                          label: _statusForProgress(l10n, _progress),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              Positioned(
+                bottom: 28,
+                left: 0,
+                right: 0,
+                child: FadeTransition(
+                  opacity: _fadeAnimation,
+                  child: Text(
+                    '✨ ${l10n.bootstrapLoading}',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: 12,
+                      color: Colors.white.withValues(alpha: 0.75),
+                      fontWeight: FontWeight.w500,
                     ),
-                  ],
+                  ),
                 ),
               ),
             ],
