@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/features/library/domain/entities/story_entity.dart';
 
 class StoryReaderScreen extends StatefulWidget {
@@ -47,7 +48,7 @@ class _StoryReaderScreenState extends State<StoryReaderScreen> {
                     SizedBox(
                       height: MediaQuery.sizeOf(context).height * 0.4,
                       width: double.infinity,
-                      child: Image.network(page.image, fit: BoxFit.cover),
+                      child: ContentNetworkImage(url: page.image),
                     ),
                     Container(
                       width: double.infinity,

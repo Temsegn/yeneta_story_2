@@ -14,12 +14,12 @@ class VideoModel extends VideoEntity {
 
   factory VideoModel.fromJson(Map<String, dynamic> json) {
     return VideoModel(
-      id: json['_id'] as String, // Backend uses _id (MongoDB)
-      title: json['title'] as String,
-      thumbnail: json['thumbnail'] as String,
+      id: (json['_id'] ?? json['id'] ?? '').toString(),
+      title: (json['title'] ?? '') as String,
+      thumbnail: (json['thumbnail'] ?? '') as String? ?? '',
       duration: '', // Backend doesn't have duration field, calculate from video if needed
       description: json['description'] as String?,
-      author: json['createdBy'] as String?, // Backend uses createdBy
+      author: json['createdBy']?.toString(),
       videoUrl: json['videoUrl'] as String?,
       isPremium: json['isPremium'] as bool?,
     );

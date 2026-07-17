@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
 import 'package:kids_app/core/widgets/empty_state_widget.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/core/auth/access_gate.dart';
 import 'package:kids_app/features/library/domain/entities/story_entity.dart';
 import 'package:kids_app/features/library/presentation/view/story_reader_screen.dart';
@@ -269,13 +270,8 @@ class _StoryCardState extends State<_StoryCard> with SingleTickerProviderStateMi
                     builder: (context, child) {
                       return Transform.scale(
                         scale: 1.0 + (_controller.value * 0.05),
-                        child: Image.network(
-                          widget.story.coverImage,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.broken_image, size: 48),
-                          ),
+                        child: ContentNetworkImage(
+                          url: widget.story.coverImage,
                         ),
                       );
                     },

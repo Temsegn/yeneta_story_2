@@ -14,7 +14,7 @@ final appPreferencesProvider = Provider<AppPreferences>((ref) {
 /// True when the user is browsing without an account.
 final guestModeProvider = StateProvider<bool>((ref) => false);
 
-/// Current app locale (en or am). Defaults to Amharic.
+/// Current app locale (en or am). Defaults to English.
 final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>((ref) {
   return LocaleNotifier(ref.watch(appPreferencesProvider));
 });
@@ -23,7 +23,7 @@ class LocaleNotifier extends StateNotifier<Locale> {
   final AppPreferences _prefs;
 
   LocaleNotifier(this._prefs)
-      : super(Locale(_prefs.localeCode ?? 'am'));
+      : super(Locale(_prefs.localeCode ?? 'en'));
 
   Future<void> setLocale(Locale locale) async {
     state = locale;

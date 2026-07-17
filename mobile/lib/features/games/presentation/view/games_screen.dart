@@ -20,35 +20,55 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
   GameEntity? _activeGame;
 
   static const _ageGroups = [
-    (id: '3-5', label: '3 - 5', color: Color(0xFFF97316), icon: '🐣', title: 'ቀላል፣ አስደሳች እና ትምህርታዊ'),
-    (id: '6-8', label: '6 - 8', color: Color(0xFF16A34A), icon: '🦊', title: 'ትምህርት + መዝናኛ + ፈጠራ'),
-    (id: '9-11', label: '9 - 11', color: Color(0xFF2563EB), icon: '🦁', title: 'አእምሮ፣ ኮዲንግ፣ ስልት'),
+    (id: '3-5', label: '3 - 5', color: Color(0xFFF97316), icon: '🐣', titleEn: 'Simple, fun, and educational', titleAm: 'ቀላል፣ አስደሳች እና ትምህርታዊ'),
+    (id: '6-8', label: '6 - 8', color: Color(0xFF16A34A), icon: '🦊', titleEn: 'Learning + fun + creativity', titleAm: 'ትምህርት + መዝናኛ + ፈጠራ'),
+    (id: '9-11', label: '9 - 11', color: Color(0xFF2563EB), icon: '🦁', titleEn: 'Mind, coding, strategy', titleAm: 'አእምሮ፣ ኮዲንግ፣ ስልት'),
   ];
+  static const _englishAges = ['Ages 3-5', 'Ages 6-8', 'Ages 9-11'];
   static const _amharicAges = ['3-5 ዓመት', '6-8 ዓመት', '9-11 ዓመት'];
 
   Color _colorFromString(String c) {
     switch (c) {
-      case 'purple': return Colors.purple.shade500;
-      case 'pink': return Colors.pink.shade500;
-      case 'green': return Colors.green.shade500;
-      case 'blue': return Colors.blue.shade500;
-      case 'indigo': return Colors.indigo.shade500;
-      case 'yellow': return Colors.yellow.shade600;
-      case 'orange': return Colors.orange.shade500;
-      case 'red': return Colors.red.shade500;
-      case 'teal': return Colors.teal.shade500;
-      case 'cyan': return Colors.cyan.shade500;
-      case 'rose': return Colors.red.shade300;
-      case 'fuchsia': return Colors.deepPurple.shade300;
-      case 'amber': return Colors.amber.shade500;
-      case 'emerald': return Colors.green.shade700;
-      case 'gray': return Colors.grey.shade700;
-      default: return AppColors.orange500;
+      case 'purple':
+        return Colors.purple.shade500;
+      case 'pink':
+        return Colors.pink.shade500;
+      case 'green':
+        return Colors.green.shade500;
+      case 'blue':
+        return Colors.blue.shade500;
+      case 'indigo':
+        return Colors.indigo.shade500;
+      case 'yellow':
+        return Colors.yellow.shade600;
+      case 'orange':
+        return Colors.orange.shade500;
+      case 'red':
+        return Colors.red.shade500;
+      case 'teal':
+        return Colors.teal.shade500;
+      case 'cyan':
+        return Colors.cyan.shade500;
+      case 'rose':
+        return Colors.red.shade300;
+      case 'fuchsia':
+        return Colors.deepPurple.shade300;
+      case 'amber':
+        return Colors.amber.shade500;
+      case 'emerald':
+        return Colors.green.shade700;
+      case 'gray':
+        return Colors.grey.shade700;
+      default:
+        return AppColors.orange500;
     }
   }
 
   @override
   Widget build(BuildContext context) {
+    final isAmharic = Localizations.localeOf(context).languageCode == 'am';
+    final ageLabels = isAmharic ? _amharicAges : _englishAges;
+
     if (_activeGame != null) {
       return GamePlayScreen(
         game: _activeGame!,
@@ -61,7 +81,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
 
     if (_selectedAge == null) {
       return SingleChildScrollView(
-        padding: EdgeInsets.only(left: 24, right: 24, top: 48, bottom: 120),
+        padding: const EdgeInsets.only(left: 24, right: 24, top: 48, bottom: 120),
         child: Column(
           children: [
             Container(
@@ -70,14 +90,30 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
               decoration: BoxDecoration(
                 gradient: const LinearGradient(colors: [Color(0xFF4ADE80), Color(0xFF059669)]),
                 borderRadius: BorderRadius.circular(40),
-                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 24)],
+                boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 24)],
               ),
               child: const Icon(Icons.sports_esports_rounded, color: Colors.white, size: 36),
             ),
             const SizedBox(height: 16),
-            Text('የጨዋታ ማእከል', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.grey.shade900, decoration: TextDecoration.none)),
+            Text(
+              isAmharic ? 'የጨዋታ ማእከል' : 'Game Center',
+              style: TextStyle(
+                fontSize: 32,
+                fontWeight: FontWeight.w900,
+                color: Colors.grey.shade900,
+                decoration: TextDecoration.none,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text('እድሜህን ምረጥ እና ዘወትር ተጫወት!', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade600, decoration: TextDecoration.none)),
+            Text(
+              isAmharic ? 'እድሜህን ምረጥ እና ዘወትር ተጫወት!' : 'Choose your age and start playing!',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.grey.shade600,
+                decoration: TextDecoration.none,
+              ),
+            ),
             const SizedBox(height: 48),
             ...List.generate(_ageGroups.length, (i) {
               final g = _ageGroups[i];
@@ -90,10 +126,12 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                       ref.read(isPlayingGameProvider.notifier).state = true;
                       final ds = ref.read(gamesDataSourceProvider);
                       final list = await ds.getGamesByAge(g.id);
-                      if (mounted) setState(() {
-                        _selectedAge = g.id;
-                        _games = list;
-                      });
+                      if (mounted) {
+                        setState(() {
+                          _selectedAge = g.id;
+                          _games = list;
+                        });
+                      }
                     },
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
@@ -101,7 +139,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                       decoration: BoxDecoration(
                         color: g.color.withValues(alpha: 0.9),
                         borderRadius: BorderRadius.circular(16),
-                        boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 24)],
+                        boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 24)],
                       ),
                       padding: const EdgeInsets.symmetric(horizontal: 40),
                       child: Row(
@@ -112,10 +150,32 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                               mainAxisAlignment: MainAxisAlignment.center,
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text('እድሜ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white.withValues(alpha: 0.6))),
-                                Text(_amharicAges[i], style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
+                                Text(
+                                  isAmharic ? 'እድሜ' : 'Age',
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white.withValues(alpha: 0.6),
+                                  ),
+                                ),
+                                Text(
+                                  ageLabels[i],
+                                  style: const TextStyle(
+                                    fontSize: 36,
+                                    fontWeight: FontWeight.w900,
+                                    color: Colors.white,
+                                    height: 1,
+                                  ),
+                                ),
                                 const SizedBox(height: 8),
-                                Text(g.title, style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.white.withValues(alpha: 0.8))),
+                                Text(
+                                  isAmharic ? g.titleAm : g.titleEn,
+                                  style: TextStyle(
+                                    fontSize: 12,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white.withValues(alpha: 0.8),
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -132,16 +192,17 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
       );
     }
 
-    // Show empty state if no games for selected age
     if (_games.isEmpty) {
       return Stack(
         children: [
-          const EmptyStateWidget(
+          EmptyStateWidget(
             emoji: '🎮',
-            title: 'ምንም ጨዋታዎች የሉም',
-            message: 'በቅርቡ አዲስ ጨዋታዎች ይመጣሉ!\nበኋላ ይመልከቱ 🎯',
-            primaryColor: Color(0xFF10B981),
-            secondaryColor: Color(0xFF34D399),
+            title: isAmharic ? 'ምንም ጨዋታዎች የሉም' : 'No games yet',
+            message: isAmharic
+                ? 'በቅርቡ አዲስ ጨዋታዎች ይመጣሉ!\nበኋላ ይመልከቱ 🎯'
+                : 'New games are coming soon!\nCheck back later 🎯',
+            primaryColor: const Color(0xFF10B981),
+            secondaryColor: const Color(0xFF34D399),
           ),
           Positioned(
             top: MediaQuery.paddingOf(context).top + 8,
@@ -164,50 +225,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                     color: Colors.white.withValues(alpha: 0.9),
                     borderRadius: BorderRadius.circular(24),
                     border: Border.all(color: AppColors.orange200),
-                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
-                  ),
-                  child: Icon(Icons.arrow_back, color: AppColors.orange600, size: 24),
-                ),
-              ),
-            ),
-          ),
-        ],
-      );
-    }
-
-    // Show empty state if no games for selected age
-    if (_games.isEmpty) {
-      return Stack(
-        children: [
-          const EmptyStateWidget(
-            emoji: '🎮',
-            title: 'ምንም ጨዋታዎች የሉም',
-            message: 'በቅርቡ አዲስ ጨዋታዎች ይመጣሉ!\nበኋላ ይመልከቱ 🎉',
-            primaryColor: Color(0xFF10B981),
-            secondaryColor: Color(0xFF34D399),
-          ),
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 8,
-            left: 24,
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  ref.read(isPlayingGameProvider.notifier).state = false;
-                  setState(() {
-                    _selectedAge = null;
-                    _games = [];
-                  });
-                },
-                borderRadius: BorderRadius.circular(24),
-                child: Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.9),
-                    borderRadius: BorderRadius.circular(24),
-                    border: Border.all(color: AppColors.orange200),
-                    boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+                    boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
                   ),
                   child: Icon(Icons.arrow_back, color: AppColors.orange600, size: 24),
                 ),
@@ -226,7 +244,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
     return Stack(
       children: [
         SingleChildScrollView(
-          padding: EdgeInsets.only(left: 24, right: 24, top: 88, bottom: 120),
+          padding: const EdgeInsets.only(left: 24, right: 24, top: 88, bottom: 120),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -236,17 +254,37 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text('${_ageGroups.firstWhere((e) => e.id == _selectedAge).icon} እድሜ $_selectedAge ዓመት', style: TextStyle(fontSize: 24, fontWeight: FontWeight.w900, color: Colors.grey.shade900)),
-                      Text('${_games.length} አስደሳች ጨዋታዎች', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Colors.grey.shade600)),
+                      Text(
+                        isAmharic
+                            ? '${_ageGroups.firstWhere((e) => e.id == _selectedAge).icon} እድሜ $_selectedAge ዓመት'
+                            : '${_ageGroups.firstWhere((e) => e.id == _selectedAge).icon} Ages $_selectedAge',
+                        style: TextStyle(
+                          fontSize: 24,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.grey.shade900,
+                        ),
+                      ),
+                      Text(
+                        isAmharic
+                            ? '${_games.length} አስደሳች ጨዋታዎች'
+                            : '${_games.length} fun games',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey.shade600,
+                        ),
+                      ),
                     ],
                   ),
                   Container(
                     width: 64,
                     height: 64,
                     decoration: BoxDecoration(
-                      gradient: LinearGradient(colors: [Colors.purple.shade500, Colors.pink.shade600]),
+                      gradient: LinearGradient(
+                        colors: [Colors.purple.shade500, Colors.pink.shade600],
+                      ),
                       borderRadius: BorderRadius.circular(24),
-                      boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 12)],
+                      boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 12)],
                     ),
                     child: const Icon(Icons.auto_awesome, color: Colors.white, size: 28),
                   ),
@@ -261,17 +299,47 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                     children: [
                       Row(
                         children: [
-                          Container(width: 32, height: 4, decoration: BoxDecoration(gradient: AppColors.primaryButtonGradient, borderRadius: BorderRadius.circular(2))),
+                          Container(
+                            width: 32,
+                            height: 4,
+                            decoration: BoxDecoration(
+                              gradient: AppColors.primaryButtonGradient,
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                          ),
                           const SizedBox(width: 12),
-                          Text(e.key, style: TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.grey.shade800)),
-                          Expanded(child: Container(height: 4, margin: const EdgeInsets.only(left: 8), decoration: BoxDecoration(gradient: LinearGradient(colors: [AppColors.green500, Colors.transparent]), borderRadius: BorderRadius.circular(2)))),
+                          Text(
+                            e.key,
+                            style: TextStyle(
+                              fontSize: 20,
+                              fontWeight: FontWeight.w900,
+                              color: Colors.grey.shade800,
+                            ),
+                          ),
+                          Expanded(
+                            child: Container(
+                              height: 4,
+                              margin: const EdgeInsets.only(left: 8),
+                              decoration: BoxDecoration(
+                                gradient: LinearGradient(
+                                  colors: [AppColors.green500, Colors.transparent],
+                                ),
+                                borderRadius: BorderRadius.circular(2),
+                              ),
+                            ),
+                          ),
                         ],
                       ),
                       const SizedBox(height: 16),
                       GridView.builder(
                         shrinkWrap: true,
                         physics: const NeverScrollableScrollPhysics(),
-                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, mainAxisSpacing: 16, crossAxisSpacing: 16, childAspectRatio: 0.85),
+                        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                          crossAxisCount: 2,
+                          mainAxisSpacing: 16,
+                          crossAxisSpacing: 16,
+                          childAspectRatio: 0.85,
+                        ),
                         itemCount: e.value.length,
                         itemBuilder: (context, i) {
                           final game = e.value[i];
@@ -284,7 +352,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                 decoration: BoxDecoration(
                                   color: _colorFromString(game.color).withValues(alpha: 0.95),
                                   borderRadius: BorderRadius.circular(24),
-                                  boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+                                  boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 8)],
                                 ),
                                 child: Column(
                                   mainAxisAlignment: MainAxisAlignment.center,
@@ -295,7 +363,12 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                                       padding: const EdgeInsets.symmetric(horizontal: 8),
                                       child: Text(
                                         game.name,
-                                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w900, color: Colors.white, decoration: TextDecoration.none),
+                                        style: const TextStyle(
+                                          fontSize: 14,
+                                          fontWeight: FontWeight.w900,
+                                          color: Colors.white,
+                                          decoration: TextDecoration.none,
+                                        ),
                                         textAlign: TextAlign.center,
                                         maxLines: 2,
                                         overflow: TextOverflow.ellipsis,
@@ -336,7 +409,7 @@ class _GamesScreenState extends ConsumerState<GamesScreen> {
                   color: Colors.white.withValues(alpha: 0.9),
                   borderRadius: BorderRadius.circular(24),
                   border: Border.all(color: AppColors.orange200),
-                  boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 8)],
+                  boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 8)],
                 ),
                 child: Icon(Icons.arrow_back, color: AppColors.orange600, size: 24),
               ),

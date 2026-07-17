@@ -42,14 +42,14 @@ flutter_launcher_icons:
   android: true
   ios: true
   image_path: "assets/images/app_icon.png"
-  adaptive_icon_background: "#6B4CE6"
+  adaptive_icon_background: "#16A34A"
   adaptive_icon_foreground: "assets/images/app_icon.png"
 
 flutter_native_splash:
-  color: "#6B4CE6"
+  color: "#16A34A"
   image: assets/images/app_icon.png
   android_12:
-    color: "#6B4CE6"
+    color: "#16A34A"
     image: assets/images/app_icon.png
 
 flutter:

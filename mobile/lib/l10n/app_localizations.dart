@@ -94,8 +94,8 @@ abstract class AppLocalizations {
 
   /// A list of this localizations delegate's supported locales.
   static const List<Locale> supportedLocales = <Locale>[
-    Locale('am'),
-    Locale('en')
+    Locale('en'),
+    Locale('am')
   ];
 
   /// No description provided for @appTitle.

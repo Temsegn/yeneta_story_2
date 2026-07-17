@@ -86,10 +86,14 @@ export async function fetchAdminStats() {
 export async function uploadFile(file: File) {
   const formData = new FormData();
   formData.append("file", file);
-  return request<{ url: string; filename: string; mimetype: string; size: number }>(
-    "/admin/uploads",
-    { method: "POST", formData }
-  );
+  return request<{
+    url: string;
+    filename: string;
+    publicId?: string;
+    resourceType?: string;
+    mimetype: string;
+    size: number;
+  }>("/admin/uploads", { method: "POST", formData });
 }
 
 export async function fetchVideos(page = 1, limit = 20, search = "") {

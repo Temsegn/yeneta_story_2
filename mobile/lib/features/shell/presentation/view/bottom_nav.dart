@@ -163,6 +163,10 @@ class _BottomNavContentState extends State<_BottomNavContent> with SingleTickerP
                 children: _tabs.asMap().entries.map((entry) {
                   final t = entry.value;
                   final isActive = activeTab == t.id;
+                  final activeIconSize =
+                      t.id == TabType.home ? 34.0 : _activeIconSize;
+                  final inactiveIconSize =
+                      t.id == TabType.home ? 24.0 : _inactiveIconSize;
                   return Material(
                     color: Colors.transparent,
                     child: InkWell(
@@ -181,14 +185,20 @@ class _BottomNavContentState extends State<_BottomNavContent> with SingleTickerP
                               TweenAnimationBuilder<double>(
                               key: ValueKey('${t.id}_$isActive'),
                               tween: Tween(
-                                begin: isActive ? _inactiveIconSize : _activeIconSize,
-                                end: isActive ? _activeIconSize : _inactiveIconSize,
+                                begin: isActive
+                                    ? inactiveIconSize
+                                    : activeIconSize,
+                                end: isActive
+                                    ? activeIconSize
+                                    : inactiveIconSize,
                               ),
                               duration: const Duration(milliseconds: _animMs),
                               curve: Curves.easeInOutCubic,
                               builder: (context, value, _) {
                                 final size = value.isNaN || value.isInfinite || value <= 0
-                                    ? (isActive ? _activeIconSize : _inactiveIconSize)
+                                    ? (isActive
+                                        ? activeIconSize
+                                        : inactiveIconSize)
                                     : value;
                                 return isActive
                                     ? _AnimatedActiveIcon(icon: t.icon, size: size)

@@ -3,7 +3,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// Persists guest-mode flag and preferred locale.
 class AppPreferences {
   static const _guestKey = 'is_guest_mode';
-  static const _localeKey = 'app_locale';
+  // v2 defaults to English for all installs (previous key defaulted to Amharic).
+  static const _localeKey = 'app_locale_v2';
 
   final SharedPreferences _prefs;
 

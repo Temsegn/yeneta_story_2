@@ -1,12 +1,12 @@
 /// App-wide constants (labels, default user name).
 abstract class AppConstants {
   static const String defaultUserName = 'Alex';
-  static const String homeGreeting = 'እንኳን ደህና መጣህ,';
+  static const String homeGreeting = 'Welcome,';
 
-  // Tab labels (Amharic)
-  static const String tabLibrary = 'ቤተ መጻሕፍት';
-  static const String tabVideo = 'ቪዲዮዎች';
-  static const String tabHome = 'መነሻ';
-  static const String tabEducation = 'ተማር';
-  static const String tabGames = 'ጨዋታዎች';
+  // Tab labels (English default)
+  static const String tabLibrary = 'Library';
+  static const String tabVideo = 'Videos';
+  static const String tabHome = 'Home';
+  static const String tabEducation = 'Learn';
+  static const String tabGames = 'Games';
 }

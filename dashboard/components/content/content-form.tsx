@@ -139,6 +139,12 @@ export function ContentForm({ kind, id }: Props) {
     setLoading(true);
     setError("");
     try {
+      if (!coverUrl.trim()) {
+        throw new Error("Please upload a cover/thumbnail image first.");
+      }
+      if ((kind === "videos" || kind === "education") && !mediaUrl.trim()) {
+        throw new Error("Please upload a video file first.");
+      }
       if (kind === "videos") {
         const body = {
           title,

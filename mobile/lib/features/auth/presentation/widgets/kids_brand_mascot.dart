@@ -114,9 +114,9 @@ class _KidsBrandMascotState extends State<KidsBrandMascot>
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFF8B5CF6),
-                        Color(0xFFFF6B9D),
-                        Color(0xFFFF9A56),
+                        Color(0xFFFACC15),
+                        Color(0xFF22C55E),
+                        Color(0xFF15803D),
                       ],
                     ),
                     border: Border.all(
@@ -125,7 +125,7 @@ class _KidsBrandMascotState extends State<KidsBrandMascot>
                     ),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF6B4CE6).withValues(alpha: 0.4),
+                        color: const Color(0xFF14532D).withValues(alpha: 0.4),
                         blurRadius: size * 0.18,
                         offset: Offset(0, size * 0.08),
                       ),

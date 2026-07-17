@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import multer from "multer";
 
+// Temporary disk landing pad — files are uploaded to Cloudinary then deleted.
 const uploadsDir = path.join(process.cwd(), "uploads");
 
 if (!fs.existsSync(uploadsDir)) {

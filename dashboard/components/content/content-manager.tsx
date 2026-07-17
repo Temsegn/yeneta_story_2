@@ -34,6 +34,12 @@ function toRows(
     id: item._id,
     title: item.title,
     description: item.description,
+    imageUrl:
+      "thumbnail" in item
+        ? item.thumbnail
+        : "coverImageUrl" in item
+          ? item.coverImageUrl
+          : undefined,
     isPremium: item.isPremium,
     isVisible: item.isVisible,
     createdAt: item.createdAt,

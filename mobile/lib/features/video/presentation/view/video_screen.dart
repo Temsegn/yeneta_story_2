@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
 import 'package:kids_app/core/widgets/empty_state_widget.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/core/auth/access_gate.dart';
 import 'package:kids_app/features/shell/presentation/providers/shell_providers.dart';
 import 'package:kids_app/features/video/domain/entities/video_entity.dart';
@@ -107,14 +108,7 @@ class _VideoListContentState extends State<_VideoListContent> {
                           children: [
                             Hero(
                               tag: 'video_${v.id}',
-                              child: Image.network(
-                                v.thumbnail,
-                                fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => Container(
-                                  color: Colors.grey.shade300,
-                                  child: const Icon(Icons.broken_image, size: 48),
-                                ),
-                              ),
+                              child: ContentNetworkImage(url: v.thumbnail),
                             ),
                             Container(
                               decoration: BoxDecoration(

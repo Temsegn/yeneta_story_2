@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
 import 'package:kids_app/core/widgets/empty_state_widget.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/core/auth/access_gate.dart';
 import 'package:kids_app/features/education/domain/entities/education_video_entity.dart';
 import 'package:kids_app/features/education/presentation/view/education_video_detail_screen.dart';
@@ -25,10 +26,14 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
     (id: '5-8', label: '5 - 8', color: Color(0xFF16A34A), icon: '🦊'),
     (id: '8-11', label: '8 - 11', color: Color(0xFF2563EB), icon: '🦁'),
   ];
+  static const _englishAges = ['Ages 3-5', 'Ages 5-8', 'Ages 8-11'];
   static const _amharicAges = ['3-5 ዓመት', '5-8 ዓመት', '8-11 ዓመት'];
 
   @override
   Widget build(BuildContext context) {
+    final isAmharic = Localizations.localeOf(context).languageCode == 'am';
+    final ageLabels = isAmharic ? _amharicAges : _englishAges;
+
     if (_selectedVideo != null && _videos.isNotEmpty) {
       final idx = _videos.indexWhere((v) => v.id == _selectedVideo!.id);
       return EducationVideoDetailScreen(
@@ -41,7 +46,8 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
     if (_selectedAge == null) {
       return _AgeSelection(
         ageGroups: _ageGroups,
-        amharicAges: _amharicAges,
+        ageLabels: ageLabels,
+        isAmharic: isAmharic,
         onSelect: (age) async {
           ref.read(isEducationAgeSelectedProvider.notifier).state = true;
           final ds = ref.read(educationRemoteDataSourceProvider);
@@ -128,7 +134,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
                     child: Stack(
                       fit: StackFit.expand,
                       children: [
-                        Image.network(v.thumbnail, fit: BoxFit.cover),
+                        ContentNetworkImage(url: v.thumbnail),
                         Container(
                           decoration: BoxDecoration(
                             gradient: LinearGradient(
@@ -229,13 +235,23 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
 
 class _AgeSelection extends StatelessWidget {
   final List<({String id, String label, Color color, String icon})> ageGroups;
-  final List<String> amharicAges;
+  final List<String> ageLabels;
+  final bool isAmharic;
   final void Function(String age) onSelect;
 
-  const _AgeSelection({required this.ageGroups, required this.amharicAges, required this.onSelect});
+  const _AgeSelection({
+    required this.ageGroups,
+    required this.ageLabels,
+    required this.isAmharic,
+    required this.onSelect,
+  });
 
   @override
   Widget build(BuildContext context) {
+    final title = isAmharic ? 'እድሜህን ምረጥ' : 'Choose your age';
+    final subtitle = isAmharic ? 'ለአንተ የተመረጠ ትምህርት' : 'Pick lessons made for you';
+    final ageWord = isAmharic ? 'እድሜ' : 'Age';
+
     return SingleChildScrollView(
       padding: EdgeInsets.only(left: 24, right: 24, top: 48, bottom: 120),
       child: Column(
@@ -252,9 +268,9 @@ class _AgeSelection extends StatelessWidget {
             child: Icon(Icons.school_rounded, color: AppColors.orange600, size: 32),
           ),
           const SizedBox(height: 16),
-          Text('እድሜህን ምረጥ', style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.grey.shade900)),
+          Text(title, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.grey.shade900)),
           const SizedBox(height: 8),
-          Text('እድሜህን ምረጥ', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
+          Text(subtitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
           const SizedBox(height: 48),
           ...List.generate(ageGroups.length, (i) {
             final g = ageGroups[i];
@@ -281,8 +297,8 @@ class _AgeSelection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text('እድሜ', style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white.withValues(alpha: 0.6))),
-                              Text(amharicAges[i], style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
+                              Text(ageWord, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white.withValues(alpha: 0.6))),
+                              Text(ageLabels[i], style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
                             ],
                           ),
                           Text(g.icon, style: const TextStyle(fontSize: 56)),

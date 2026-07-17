@@ -13,6 +13,7 @@ import 'package:kids_app/core/localization/locale_provider.dart';
 import 'package:kids_app/features/subscription/presentation/providers/subscription_providers.dart';
 import 'package:kids_app/core/widgets/payment_prompt_banner.dart';
 import 'package:kids_app/core/widgets/language_switcher.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/core/auth/auth_gate.dart';
 import 'package:kids_app/core/auth/access_gate.dart';
 
@@ -52,15 +53,15 @@ class HomeScreen extends ConsumerWidget {
                         style: const TextStyle(
                           fontSize: 20,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 10),
                       Text(
                         l10n.checkConnection,
-                        style: TextStyle(
+                        style: const TextStyle(
                           fontSize: 14,
-                          color: Colors.grey.shade600,
+                          color: Colors.white,
                         ),
                       ),
                       const SizedBox(height: 30),
@@ -269,10 +270,10 @@ class _HomeContent extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             l10n.exploreSubtitle,
-            style: TextStyle(
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.w800,
-              color: AppColors.orange600,
+              color: Colors.white,
             ),
           ),
           const SizedBox(height: 32),
@@ -281,10 +282,10 @@ class _HomeContent extends StatelessWidget {
             children: [
               Text(
                 l10n.watchAndLearn,
-                style: TextStyle(
+                style: const TextStyle(
                   fontSize: 22,
                   fontWeight: FontWeight.w900,
-                  color: Colors.grey.shade800,
+                  color: Colors.white,
                 ),
               ),
               Container(
@@ -398,13 +399,8 @@ class _VideoCardState extends State<_VideoCard> with SingleTickerProviderStateMi
                     builder: (context, child) {
                       return Transform.scale(
                         scale: _scaleAnimation.value,
-                        child: Image.network(
-                          widget.video.thumbnail,
-                          fit: BoxFit.cover,
-                          errorBuilder: (_, __, ___) => Container(
-                            color: Colors.grey.shade300,
-                            child: const Icon(Icons.broken_image, size: 48),
-                          ),
+                        child: ContentNetworkImage(
+                          url: widget.video.thumbnail,
                         ),
                       );
                     },

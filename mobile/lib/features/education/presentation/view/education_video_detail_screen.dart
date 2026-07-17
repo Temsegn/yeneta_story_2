@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/features/education/domain/entities/education_video_entity.dart';
 
 class EducationVideoDetailScreen extends StatefulWidget {
@@ -89,7 +90,7 @@ class _EducationVideoDetailScreenState extends State<EducationVideoDetailScreen>
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(video.thumbnail, fit: BoxFit.cover),
+            ContentNetworkImage(url: video.thumbnail),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(

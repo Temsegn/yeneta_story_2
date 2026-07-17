@@ -1,3 +1,4 @@
+import fs from "fs";
 import {
   getAdminStatsService,
   listUsersService,
@@ -20,6 +21,7 @@ import {
   updatePlanService,
   deletePlanService,
 } from "../services/subscription_plan_service.js";
+import { uploadToCloudinary } from "../config/cloudinary.js";
 import { logAction } from "../utils/auditLogger.js";
 
 const handle = (fn) => async (req, res) => {
@@ -195,25 +197,33 @@ export const uploadFile = handle(async (req, res) => {
     return res.status(400).json({ message: "No file uploaded" });
   }
 
-  const base =
-    process.env.PUBLIC_API_URL ||
-    process.env.API_PUBLIC_URL ||
-    `${req.protocol}://${req.get("host")}`;
+  const localPath = req.file.path;
 
-  const url = `${base.replace(/\/$/, "")}/uploads/${req.file.filename}`;
+  try {
+    const uploaded = await uploadToCloudinary(localPath, {
+      mimetype: req.file.mimetype,
+      originalname: req.file.originalname,
+    });
 
-  res.status(201).json({
-    url,
-    filename: req.file.filename,
-    mimetype: req.file.mimetype,
-    size: req.file.size,
-  });
+    res.status(201).json({
+      url: uploaded.secure_url,
+      filename: uploaded.original_filename || req.file.originalname,
+      publicId: uploaded.public_id,
+      resourceType: uploaded.resource_type,
+      mimetype: req.file.mimetype,
+      size: req.file.size,
+    });
 
-  await logAction({
-    user: req.user._id,
-    action: "UPLOAD_FILE",
-    targetModel: "Upload",
-    targetId: req.file.filename,
-    ipAddress: req.ip,
-  });
+    await logAction({
+      user: req.user._id,
+      action: "UPLOAD_FILE",
+      targetModel: "Upload",
+      targetId: uploaded.public_id,
+      ipAddress: req.ip,
+    });
+  } finally {
+    if (localPath) {
+      fs.unlink(localPath, () => {});
+    }
+  }
 });

@@ -62,6 +62,7 @@ app.use(
   })
 );
 
+// Local /uploads is only a temporary landing pad for multer before Cloudinary.
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 // swagger setup

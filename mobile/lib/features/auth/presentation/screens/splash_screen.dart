@@ -24,9 +24,9 @@ class _SplashScreenState extends ConsumerState<SplashScreen>
   double _progress = 0;
 
   static const _gradient = [
-    Color(0xFFFF9A56),
-    Color(0xFFFF6B9D),
-    Color(0xFF845EC2),
+    Color(0xFFFACC15),
+    Color(0xFF22C55E),
+    Color(0xFF15803D),
   ];
 
   @override

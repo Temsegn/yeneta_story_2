@@ -13,6 +13,7 @@ export type ContentRow = {
   id: string;
   title: string;
   description?: string;
+  imageUrl?: string;
   isPremium?: boolean;
   isVisible?: boolean;
   createdAt?: string;
@@ -80,7 +81,8 @@ export function ContentTable({
         />
       ) : (
         <div className="overflow-hidden rounded-2xl border border-border bg-white">
-          <div className="hidden grid-cols-[1.3fr_1.2fr_0.6fr_0.7fr_0.7fr_1fr] gap-3 border-b border-border bg-muted/50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-fg lg:grid">
+          <div className="hidden grid-cols-[0.45fr_1.3fr_1.2fr_0.6fr_0.7fr_0.7fr_1fr] gap-3 border-b border-border bg-muted/50 px-4 py-3 text-xs font-bold uppercase tracking-wide text-muted-fg lg:grid">
+            <span>Cover</span>
             <span>Title</span>
             <span>Description</span>
             <span>Access</span>
@@ -92,8 +94,22 @@ export function ContentTable({
             {filtered.map((row) => (
               <div
                 key={row.id}
-                className="grid gap-3 px-4 py-4 lg:grid-cols-[1.3fr_1.2fr_0.6fr_0.7fr_0.7fr_1fr] lg:items-center"
+                className="grid gap-3 px-4 py-4 lg:grid-cols-[0.45fr_1.3fr_1.2fr_0.6fr_0.7fr_0.7fr_1fr] lg:items-center"
               >
+                <div className="h-14 w-20 overflow-hidden rounded-xl border border-border bg-muted">
+                  {row.imageUrl ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img
+                      src={row.imageUrl}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                  ) : (
+                    <div className="flex h-full items-center justify-center text-[10px] text-muted-fg">
+                      No image
+                    </div>
+                  )}
+                </div>
                 <div>
                   {detailHref ? (
                     <Link

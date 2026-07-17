@@ -2,6 +2,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
+import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/features/shell/presentation/providers/shell_providers.dart';
 import 'package:kids_app/features/video/domain/entities/video_entity.dart';
 import 'package:kids_app/features/video/domain/usecases/get_sample_videos_usecase.dart';
@@ -112,7 +113,7 @@ class _VideoPlayerOverlayState extends ConsumerState<VideoPlayerOverlay> {
         child: Stack(
           fit: StackFit.expand,
           children: [
-            Image.network(video.thumbnail, fit: BoxFit.cover),
+            ContentNetworkImage(url: video.thumbnail),
             Container(
               decoration: BoxDecoration(
                 gradient: LinearGradient(
