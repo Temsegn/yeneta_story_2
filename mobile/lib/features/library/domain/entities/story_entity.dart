@@ -4,11 +4,17 @@ class StoryPageEntity {
   final String text;
   final String image;
 
-  const StoryPageEntity({required this.id, required this.text, required this.image});
+  const StoryPageEntity({
+    required this.id,
+    required this.text,
+    required this.image,
+  });
 }
 
 class StoryEntity {
   final int id;
+  /// Stable backend Mongo ObjectId used for detail fetches.
+  final String apiId;
   final String title;
   final String coverImage;
   final List<StoryPageEntity> pages;
@@ -16,9 +22,28 @@ class StoryEntity {
 
   const StoryEntity({
     required this.id,
+    this.apiId = '',
     required this.title,
     required this.coverImage,
     required this.pages,
     this.isPremium = false,
   });
+
+  StoryEntity copyWith({
+    int? id,
+    String? apiId,
+    String? title,
+    String? coverImage,
+    List<StoryPageEntity>? pages,
+    bool? isPremium,
+  }) {
+    return StoryEntity(
+      id: id ?? this.id,
+      apiId: apiId ?? this.apiId,
+      title: title ?? this.title,
+      coverImage: coverImage ?? this.coverImage,
+      pages: pages ?? this.pages,
+      isPremium: isPremium ?? this.isPremium,
+    );
+  }
 }

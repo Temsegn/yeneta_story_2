@@ -12,4 +12,10 @@ class StoryRepositoryImpl implements StoryRepository {
 
   @override
   Future<List<StoryEntity>> getBooks() => remote.getBooks();
+
+  @override
+  Future<StoryEntity> getStoryById(String id) => remote.getStoryById(id);
+
+  @override
+  Future<StoryEntity> getBookById(String id) => remote.getBookById(id);
 }

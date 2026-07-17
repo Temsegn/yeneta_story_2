@@ -520,13 +520,49 @@ export async function handleWebhook(payload, signature) {
  * Premium access: paid subscription OR active free trial.
  */
 export async function checkUserAccess(userId) {
-  const user = await User.findById(userId);
+  const now = new Date();
+  const [user, activeSub] = await Promise.all([
+    User.findById(userId)
+      .select(
+        "fullName isPremium hasActiveSubscription premiumExpiresAt subscriptionEndDate currentPlan trialEndDate"
+      )
+      .lean(),
+    Subscription.findOne({
+      user: userId,
+      status: "active",
+      endDate: { $gt: now },
+    })
+      .sort({ endDate: -1 })
+      .lean(),
+  ]);
   if (!user) throw new Error("User not found");
 
-  const now = new Date();
+  if (activeSub) {
+    const daysLeft = Math.ceil(
+      (new Date(activeSub.endDate).getTime() - now.getTime()) / 86400000
+    );
+    return {
+      hasAccess: true,
+      isPremium: true,
+      accessType: "subscription",
+      plan: activeSub.plan || user.currentPlan,
+      daysLeft,
+      expiresAt: activeSub.endDate,
+      requiresPayment: false,
+      fullName: user.fullName,
+    };
+  }
 
+  const premiumCandidates = [
+    user.premiumExpiresAt,
+    user.subscriptionEndDate,
+  ].filter(Boolean);
   const premiumUntil =
-    user.premiumExpiresAt || user.subscriptionEndDate || null;
+    premiumCandidates.length > 0
+      ? new Date(
+          Math.max(...premiumCandidates.map((d) => new Date(d).getTime()))
+        )
+      : null;
   const isPremiumNow =
     (user.isPremium || user.hasActiveSubscription) &&
     premiumUntil &&
@@ -582,14 +618,29 @@ export async function checkUserAccess(userId) {
  * GET /subscriptions/me shape for Flutter.
  */
 export async function getSubscriptionMe(userId) {
-  const access = await checkUserAccess(userId);
-  const active = await Subscription.findOne({
-    user: userId,
-    status: "active",
-    endDate: { $gt: new Date() },
-  }).sort({ endDate: -1 });
+  const now = new Date();
+  const [access, active, visiblePlans] = await Promise.all([
+    checkUserAccess(userId),
+    Subscription.findOne({
+      user: userId,
+      status: "active",
+      endDate: { $gt: now },
+    })
+      .sort({ endDate: -1 })
+      .lean(),
+    getVisiblePlansMap(),
+  ]);
 
-  const visiblePlans = await getVisiblePlansMap();
+  // An active Subscription is authoritative. This also repairs access for
+  // subscriptions created by admin/legacy flows that did not update User flags.
+  const hasPaidSubscription = !!active;
+  const expiresAt = active?.endDate || access.expiresAt;
+  const daysLeft = expiresAt
+    ? Math.max(
+        0,
+        Math.ceil((new Date(expiresAt).getTime() - now.getTime()) / 86400000)
+      )
+    : access.daysLeft;
   const planList =
     Object.keys(visiblePlans).length > 0
       ? Object.values(visiblePlans)
@@ -598,13 +649,14 @@ export async function getSubscriptionMe(userId) {
         );
 
   return {
-    isPremium: !!access.isPremium || access.accessType === "trial",
-    hasAccess: access.hasAccess,
-    accessType: access.accessType,
+    isPremium:
+      hasPaidSubscription || !!access.isPremium || access.accessType === "trial",
+    hasAccess: hasPaidSubscription || access.hasAccess,
+    accessType: hasPaidSubscription ? "subscription" : access.accessType,
     plan: active?.plan || access.plan,
-    expiresAt: active?.endDate || access.expiresAt,
-    daysLeft: access.daysLeft,
-    requiresPayment: access.requiresPayment,
+    expiresAt,
+    daysLeft,
+    requiresPayment: hasPaidSubscription ? false : access.requiresPayment,
     fullName: access.fullName,
     message: access.message,
     plans: planList.map((p) => ({

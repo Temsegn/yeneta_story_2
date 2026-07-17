@@ -34,6 +34,18 @@ class AccessGate {
     if (!isPremium) return true;
     if (hasPremiumAccess(ref)) return true;
 
+    // Entitlement may have changed after payment or an admin update. Refresh
+    // once before showing a paid user the locked-content dialog.
+    if (!AuthGate.isGuest(ref)) {
+      try {
+        await refreshAccessInfo(ref);
+        if (hasPremiumAccess(ref)) return true;
+      } catch (_) {
+        // Keep the existing cached decision when the network is unavailable.
+      }
+    }
+
+    if (!context.mounted) return false;
     final l10n = AppLocalizations.of(context);
     final isGuest = AuthGate.isGuest(ref);
 
@@ -108,6 +120,7 @@ class PremiumLockBadge extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    ref.watch(accessInfoProvider);
     if (!isPremium || AccessGate.hasPremiumAccess(ref)) {
       return const SizedBox.shrink();
     }

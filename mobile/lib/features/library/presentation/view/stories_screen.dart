@@ -4,7 +4,9 @@ import 'package:kids_app/core/theme/app_colors.dart';
 import 'package:kids_app/core/widgets/empty_state_widget.dart';
 import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/core/auth/access_gate.dart';
+import 'package:kids_app/core/network/api_exception.dart';
 import 'package:kids_app/features/library/domain/entities/story_entity.dart';
+import 'package:kids_app/features/library/presentation/providers/library_providers.dart';
 import 'package:kids_app/features/library/presentation/view/story_reader_screen.dart';
 import 'package:kids_app/features/library/presentation/viewmodel/stories_viewmodel.dart';
 import 'package:kids_app/features/shell/presentation/providers/shell_providers.dart';
@@ -18,14 +20,91 @@ class StoriesScreen extends ConsumerStatefulWidget {
 
 class _StoriesScreenState extends ConsumerState<StoriesScreen> {
   bool _storiesFilter = true; // true = Stories, false = Books
+  bool _opening = false;
+
+  Future<void> _openStory(StoryEntity story) async {
+    if (_opening) return;
+
+    final ok = await AccessGate.canOpenPremium(
+      context,
+      ref,
+      isPremium: story.isPremium,
+    );
+    if (!ok || !mounted) return;
+
+    setState(() => _opening = true);
+    try {
+      StoryEntity detailed = story;
+      if (story.apiId.isNotEmpty && !story.apiId.startsWith('sample_')) {
+        final repo = ref.read(storyRepositoryProvider);
+        detailed = _storiesFilter
+            ? await repo.getStoryById(story.apiId)
+            : await repo.getBookById(story.apiId);
+      }
+
+      if (!mounted) return;
+      if (detailed.pages.isEmpty) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('This item has no pages yet.'),
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+        return;
+      }
+
+      ref.read(isReadingStoryProvider.notifier).state = true;
+      await Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => StoryReaderScreen(
+            story: detailed,
+            onClose: () {
+              ref.read(isReadingStoryProvider.notifier).state = false;
+              Navigator.of(context).pop();
+            },
+          ),
+        ),
+      );
+    } on ApiException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(e.message),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Could not open this item. Please try again.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    } finally {
+      if (mounted) setState(() => _opening = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final state = ref.watch(storiesViewModelProvider(_storiesFilter));
-    return state.when(
-      data: (list) => _buildContent(list),
-      loading: () => const Center(child: CircularProgressIndicator(color: AppColors.orange500)),
-      error: (e, _) => Center(child: Text('$e')),
+    return Stack(
+      children: [
+        state.when(
+          data: (list) => _buildContent(list),
+          loading: () => const Center(
+            child: CircularProgressIndicator(color: AppColors.orange500),
+          ),
+          error: (e, _) => Center(child: Text('$e')),
+        ),
+        if (_opening)
+          Container(
+            color: Colors.black26,
+            alignment: Alignment.center,
+            child: const CircularProgressIndicator(color: AppColors.orange500),
+          ),
+      ],
     );
   }
 
@@ -89,26 +168,7 @@ class _StoriesScreenState extends ConsumerState<StoriesScreen> {
               },
               child: _StoryCard(
                 story: story,
-                onTap: () async {
-                  final ok = await AccessGate.canOpenPremium(
-                    context,
-                    ref,
-                    isPremium: story.isPremium,
-                  );
-                  if (!ok || !mounted) return;
-                  ref.read(isReadingStoryProvider.notifier).state = true;
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => StoryReaderScreen(
-                        story: story,
-                        onClose: () {
-                          ref.read(isReadingStoryProvider.notifier).state = false;
-                          Navigator.of(context).pop();
-                        },
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => _openStory(story),
               ),
             );
           }),
