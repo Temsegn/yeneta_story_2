@@ -1,25 +1,33 @@
 import { v2 as cloudinary } from "cloudinary";
 
-const { CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, CLOUDINARY_API_SECRET } =
-  process.env;
-
-if (
-  CLOUDINARY_CLOUD_NAME &&
-  CLOUDINARY_API_KEY &&
-  CLOUDINARY_API_SECRET
-) {
-  cloudinary.config({
-    cloud_name: CLOUDINARY_CLOUD_NAME,
-    api_key: CLOUDINARY_API_KEY,
-    api_secret: CLOUDINARY_API_SECRET,
-    secure: true,
-  });
+function getCloudinaryEnv() {
+  return {
+    cloudName: process.env.CLOUDINARY_CLOUD_NAME?.trim(),
+    apiKey: process.env.CLOUDINARY_API_KEY?.trim(),
+    apiSecret: process.env.CLOUDINARY_API_SECRET?.trim(),
+  };
 }
 
+function configureCloudinary() {
+  const { cloudName, apiKey, apiSecret } = getCloudinaryEnv();
+  if (cloudName && apiKey && apiSecret) {
+    cloudinary.config({
+      cloud_name: cloudName,
+      api_key: apiKey,
+      api_secret: apiSecret,
+      secure: true,
+    });
+  }
+  return { cloudName, apiKey, apiSecret };
+}
+
+configureCloudinary();
+
 export function assertCloudinaryConfigured() {
-  if (!CLOUDINARY_CLOUD_NAME || !CLOUDINARY_API_KEY || !CLOUDINARY_API_SECRET) {
+  const { cloudName, apiKey, apiSecret } = configureCloudinary();
+  if (!cloudName || !apiKey || !apiSecret) {
     const err = new Error(
-      "Cloudinary is not configured. Set CLOUDINARY_CLOUD_NAME, CLOUDINARY_API_KEY, and CLOUDINARY_API_SECRET."
+      "Cloudinary is not configured on the server. Add the Cloudinary environment variables in Render, then redeploy."
     );
     err.statusCode = 503;
     throw err;
