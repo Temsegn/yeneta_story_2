@@ -243,10 +243,18 @@ export function ContentForm({ kind, id }: Props) {
 
         {(kind === "videos" || kind === "education") && (
           <FileUpload
-            label="Video file / URL"
+            label="Video file"
             accept="video/*"
             value={mediaUrl}
             onUploaded={setMediaUrl}
+            onUploadComplete={(result) => {
+              if (result.posterUrl && !coverUrl) {
+                setCoverUrl(result.posterUrl);
+              }
+              if (kind === "education" && result.duration && !duration) {
+                setDuration(result.duration);
+              }
+            }}
           />
         )}
 

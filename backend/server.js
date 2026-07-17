@@ -1,6 +1,7 @@
 import express from "express";
 import dotenv from "dotenv";
 import path from "path";
+import mongoose from "mongoose";
 import connectDB from "./config/db.js";
 import apiRoutes from "./routes/index_routes.js";
 
@@ -265,7 +266,13 @@ app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/api/v1", apiRoutes);
 
 app.get("/health", (req, res) => {
-  res.status(200).json({ status: "ok", message: "Server is healthy" });
+  const dbState = mongoose?.connection?.readyState;
+  // 0=disconnected 1=connected 2=connecting 3=disconnecting
+  res.status(200).json({
+    status: "ok",
+    message: "Server is healthy",
+    db: dbState === 1 ? "connected" : "disconnected",
+  });
 });
 
 app.use(notFound);

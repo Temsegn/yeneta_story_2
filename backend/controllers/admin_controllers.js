@@ -205,13 +205,23 @@ export const uploadFile = handle(async (req, res) => {
       originalname: req.file.originalname,
     });
 
+    const url = uploaded.delivery_url || uploaded.secure_url;
+
     res.status(201).json({
-      url: uploaded.secure_url,
+      url,
+      posterUrl: uploaded.poster_url || null,
       filename: uploaded.original_filename || req.file.originalname,
       publicId: uploaded.public_id,
       resourceType: uploaded.resource_type,
+      kind: uploaded.kind,
       mimetype: req.file.mimetype,
       size: req.file.size,
+      bytes: uploaded.bytes || req.file.size,
+      width: uploaded.width || null,
+      height: uploaded.height || null,
+      duration: uploaded.duration_label || null,
+      durationSeconds: uploaded.duration || null,
+      format: uploaded.format || null,
     });
 
     await logAction({

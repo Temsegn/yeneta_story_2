@@ -83,18 +83,71 @@ export async function fetchAdminStats() {
   return request<DashboardStats>("/admin/stats");
 }
 
-export async function uploadFile(file: File) {
+export type UploadResult = {
+  url: string;
+  posterUrl?: string | null;
+  filename: string;
+  publicId?: string;
+  resourceType?: string;
+  kind?: string;
+  mimetype: string;
+  size: number;
+  bytes?: number;
+  width?: number | null;
+  height?: number | null;
+  duration?: string | null;
+  durationSeconds?: number | null;
+  format?: string | null;
+};
+
+export async function uploadFile(
+  file: File,
+  onProgress?: (percent: number) => void
+): Promise<UploadResult> {
   const formData = new FormData();
   formData.append("file", file);
-  return request<{
-    url: string;
-    filename: string;
-    publicId?: string;
-    resourceType?: string;
-    mimetype: string;
-    size: number;
-  }>("/admin/uploads", { method: "POST", formData });
+
+  // XHR so we can show real upload progress for large videos.
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/admin/uploads`);
+    xhr.responseType = "json";
+
+    const token = getAccessToken();
+    if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+    xhr.setRequestHeader("Accept", "application/json");
+
+    xhr.upload.onprogress = (event) => {
+      if (!event.lengthComputable || !onProgress) return;
+      onProgress(Math.round((event.loaded / event.total) * 100));
+    };
+
+    xhr.onload = () => {
+      const data = xhr.response || {};
+      if (xhr.status === 401) {
+        clearSession();
+        if (typeof window !== "undefined") window.location.href = "/login";
+        reject(new Error("Session expired. Please sign in again."));
+        return;
+      }
+      if (xhr.status < 200 || xhr.status >= 300) {
+        reject(
+          new Error(
+            typeof data?.message === "string"
+              ? data.message
+              : `Upload failed (${xhr.status})`
+          )
+        );
+        return;
+      }
+      resolve(data as UploadResult);
+    };
+
+    xhr.onerror = () => reject(new Error("Upload failed. Check your connection."));
+    xhr.send(formData);
+  });
 }
+
 
 export async function fetchVideos(page = 1, limit = 20, search = "") {
   const params = new URLSearchParams({
