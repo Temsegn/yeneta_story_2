@@ -1,5 +1,6 @@
 import cron from "node-cron";
 import { getExpiringSubscriptions } from "../services/chapa_service.js";
+import { sendTrialExpiryReminder } from "../services/notification_service.js";
 import User from "../models/user_model.js";
 
 /**
@@ -7,14 +8,12 @@ import User from "../models/user_model.js";
  * Runs daily at midnight
  */
 export function startSubscriptionCron() {
-  // Run every day at midnight (00:00)
   cron.schedule("0 0 * * *", async () => {
     console.log("Running subscription expiry check...");
-    
+
     try {
       const now = new Date();
-      
-      // Find users with expired subscriptions
+
       const expiredUsers = await User.find({
         $or: [
           { hasActiveSubscription: true, subscriptionEndDate: { $lt: now } },
@@ -30,8 +29,9 @@ export function startSubscriptionCron() {
         user.premiumExpiresAt = user.premiumExpiresAt || user.subscriptionEndDate;
         user.currentPlan = "trial";
         await user.save();
-        
-        console.log(`Deactivated subscription for user: ${user.email}`);
+        console.log(
+          `Deactivated subscription for user: ${user.email || user.phoneNumber}`
+        );
       }
 
       console.log("Subscription expiry check completed");
@@ -40,28 +40,41 @@ export function startSubscriptionCron() {
     }
   });
 
-  // Check for subscriptions expiring in 7 days
-  // Runs daily at 9 AM
+  // Reminder for subscriptions/trials expiring soon — daily 9 AM
   cron.schedule("0 9 * * *", async () => {
-    console.log("Checking for expiring subscriptions...");
-    
+    console.log("Checking for expiring subscriptions/trials...");
+
     try {
       const expiringUsers = await getExpiringSubscriptions(7);
-      
-      console.log(`Found ${expiringUsers.length} subscriptions expiring in 7 days`);
+      console.log(
+        `Found ${expiringUsers.length} subscriptions expiring in 7 days`
+      );
 
       for (const user of expiringUsers) {
-        const daysLeft = Math.ceil(
-          (user.subscriptionEndDate - new Date()) / (1000 * 60 * 60 * 24)
+        const end = user.premiumExpiresAt || user.subscriptionEndDate;
+        const daysLeft = Math.max(
+          1,
+          Math.ceil((new Date(end) - new Date()) / (1000 * 60 * 60 * 24))
         );
-        
-        console.log(
-          `User ${user.email} subscription expires in ${daysLeft} days`
+        await sendTrialExpiryReminder(user._id, daysLeft);
+      }
+
+      const now = new Date();
+      const inThreeDays = new Date(now);
+      inThreeDays.setDate(now.getDate() + 3);
+      const trialUsers = await User.find({
+        role: "parent",
+        isPremium: { $ne: true },
+        hasActiveSubscription: { $ne: true },
+        trialEndDate: { $gte: now, $lte: inThreeDays },
+      }).select("_id trialEndDate");
+
+      for (const user of trialUsers) {
+        const daysLeft = Math.max(
+          1,
+          Math.ceil((user.trialEndDate - now) / (1000 * 60 * 60 * 24))
         );
-        
-        // TODO: Send reminder email/push notification
-        // await sendEmail(user.email, "Subscription Expiring Soon", ...);
-        // await sendPushNotification(user._id, "Your subscription expires in " + daysLeft + " days");
+        await sendTrialExpiryReminder(user._id, daysLeft);
       }
 
       console.log("Expiring subscriptions check completed");
@@ -71,22 +84,4 @@ export function startSubscriptionCron() {
   });
 
   console.log("Subscription cron jobs started");
-}
-
-/**
- * Send email notification (placeholder)
- * Integrate with your email service (SendGrid, AWS SES, etc.)
- */
-async function sendEmail(to, subject, body) {
-  // TODO: Implement email sending
-  console.log(`Email to ${to}: ${subject}`);
-}
-
-/**
- * Send push notification (placeholder)
- * Integrate with FCM or your push notification service
- */
-async function sendPushNotification(userId, message) {
-  // TODO: Implement push notification
-  console.log(`Push to user ${userId}: ${message}`);
 }

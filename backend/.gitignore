@@ -4,6 +4,11 @@ node_modules/
 # Environment variables
 .env
 
+# Firebase Admin service-account keys (never commit)
+firebase-service-account.json
+*firebase-adminsdk*.json
+serviceAccountKey.json
+
 # Build folder
 dist/
 

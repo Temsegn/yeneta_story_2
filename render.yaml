@@ -39,4 +39,6 @@ services:
         sync: false
       - key: CLOUDINARY_FOLDER
         value: yeneta
+      - key: FIREBASE_SERVICE_ACCOUNT_JSON
+        sync: false
     healthCheckPath: /health

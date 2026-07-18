@@ -26,6 +26,7 @@ class HomeScreen extends ConsumerWidget {
     final unreadCount = ref.watch(unreadCountProvider);
     final l10n = AppLocalizations.of(context);
     ref.watch(homeAccessLoaderProvider);
+    ref.watch(homeNotificationLoaderProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,

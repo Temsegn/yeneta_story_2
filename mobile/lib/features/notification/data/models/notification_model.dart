@@ -16,8 +16,20 @@ class NotificationModel with _$NotificationModel {
     Map<String, dynamic>? metadata,
   }) = _NotificationModel;
 
-  factory NotificationModel.fromJson(Map<String, dynamic> json) =>
-      _$NotificationModelFromJson(json);
+  factory NotificationModel.fromJson(Map<String, dynamic> json) {
+    final mapped = Map<String, dynamic>.from(json);
+    mapped['id'] = (json['_id'] ?? json['id'] ?? '').toString();
+    mapped['isRead'] = json['isRead'] as bool? ?? false;
+    mapped['type'] = (json['type'] ?? 'system').toString();
+    mapped['title'] = (json['title'] ?? '').toString();
+    mapped['message'] = (json['message'] ?? '').toString();
+    if (json['createdAt'] != null) {
+      mapped['createdAt'] = json['createdAt'].toString();
+    } else {
+      mapped['createdAt'] = DateTime.now().toIso8601String();
+    }
+    return _$NotificationModelFromJson(mapped);
+  }
 }
 
 enum NotificationType {

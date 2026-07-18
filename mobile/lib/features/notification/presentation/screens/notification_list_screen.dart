@@ -4,17 +4,33 @@ import 'package:go_router/go_router.dart';
 import '../providers/notification_provider.dart';
 import '../../data/models/notification_model.dart';
 
-class NotificationListScreen extends ConsumerWidget {
+class NotificationListScreen extends ConsumerStatefulWidget {
   const NotificationListScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final notifications = ref.watch(notificationProvider);
+  ConsumerState<NotificationListScreen> createState() =>
+      _NotificationListScreenState();
+}
+
+class _NotificationListScreenState
+    extends ConsumerState<NotificationListScreen> {
+  @override
+  void initState() {
+    super.initState();
+    Future.microtask(
+      () => ref.read(notificationProvider.notifier).refresh(notifyDevice: false),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final state = ref.watch(notificationProvider);
+    final notifications = state.items;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Notifications'),
-        backgroundColor: const Color(0xFF6B4CE6),
+        backgroundColor: const Color(0xFF16A34A),
         foregroundColor: Colors.white,
         actions: [
           if (notifications.any((n) => !n.isRead))
@@ -29,15 +45,25 @@ class NotificationListScreen extends ConsumerWidget {
             ),
         ],
       ),
-      body: notifications.isEmpty
-          ? _buildEmptyState()
-          : ListView.builder(
-              itemCount: notifications.length,
-              itemBuilder: (context, index) {
-                final notification = notifications[index];
-                return _buildNotificationItem(context, ref, notification);
-              },
-            ),
+      body: state.loading && notifications.isEmpty
+          ? const Center(child: CircularProgressIndicator())
+          : notifications.isEmpty
+              ? _buildEmptyState()
+              : RefreshIndicator(
+                  onRefresh: () =>
+                      ref.read(notificationProvider.notifier).refresh(),
+                  child: ListView.builder(
+                    itemCount: notifications.length,
+                    itemBuilder: (context, index) {
+                      final notification = notifications[index];
+                      return _buildNotificationItem(
+                        context,
+                        ref,
+                        notification,
+                      );
+                    },
+                  ),
+                ),
     );
   }
 

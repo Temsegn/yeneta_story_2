@@ -13,6 +13,7 @@ class ApiConfig {
   static const String books = '/books';
   static const String stories = '/stories';
   static const String education = '/education';
+  static const String notifications = '/notifications';
   static const String subscriptions = '/subscriptions';
   static const String payments = '/payments';
   

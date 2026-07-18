@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
-import '../../features/subscription/data/models/subscription_models.dart';
+import '../../features/notification/presentation/providers/notification_provider.dart';
 import '../../features/subscription/presentation/providers/subscription_providers.dart';
 import '../auth/auth_gate.dart';
 import '../localization/locale_provider.dart';
@@ -130,4 +130,15 @@ final homeAccessLoaderProvider = FutureProvider<void>((ref) async {
     final info = await ds.checkAccess();
     ref.read(accessInfoProvider.notifier).state = info;
   } catch (_) {}
+});
+
+/// Loads in-app notifications + triggers device alerts for new unread items.
+final homeNotificationLoaderProvider = FutureProvider<void>((ref) async {
+  final user = ref.watch(authStateProvider);
+  final isGuest = ref.watch(guestModeProvider);
+  if (user == null || isGuest) return;
+
+  final notifier = ref.read(notificationProvider.notifier);
+  await notifier.registerDevice();
+  await notifier.refresh(notifyDevice: true);
 });

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "873640991595",
+    "project_id": "yeneta-3c007",
+    "storage_bucket": "yeneta-3c007.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:873640991595:android:b1bb8ae98168394d1f8a2e",
+        "android_client_info": {
+          "package_name": "com.yeneta.kid"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYQiR6Gt3rWZ-M8olcAVSWEK1o9ogVa1Y"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

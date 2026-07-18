@@ -27,6 +27,7 @@ import {
   deletePlan,
   uploadFile,
 } from "../controllers/admin_controllers.js";
+import { broadcast } from "../controllers/notification_controllers.js";
 
 const router = express.Router();
 
@@ -63,6 +64,12 @@ router.post(
   (req, res, next) => {
     uploadFile(req, res).catch(next);
   }
+);
+
+router.post(
+  "/notifications/broadcast",
+  requireRoles("admin", "content_manager"),
+  broadcast
 );
 
 export default router;

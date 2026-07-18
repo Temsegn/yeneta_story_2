@@ -336,6 +336,18 @@ export async function fetchAuditLogs(params: Record<string, string> = {}) {
   return request<AuditLogItem[] | { logs: AuditLogItem[] }>(`/auditlogs?${q}`);
 }
 
+export async function broadcastNotification(body: {
+  title: string;
+  message: string;
+  type?: string;
+  actionUrl?: string;
+}) {
+  return request<{ message: string; created: number; pushed: number }>(
+    "/admin/notifications/broadcast",
+    { method: "POST", body }
+  );
+}
+
 export function getApiBaseUrl() {
   return API_URL;
 }

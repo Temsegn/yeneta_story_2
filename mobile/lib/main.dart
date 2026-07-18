@@ -5,11 +5,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:kids_app/core/theme/app_theme.dart';
 import 'package:kids_app/core/router/app_router.dart';
 import 'package:kids_app/core/localization/locale_provider.dart';
+import 'package:kids_app/features/notification/data/services/device_notification_service.dart';
 import 'package:kids_app/l10n/app_localizations.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   final prefs = await SharedPreferences.getInstance();
+  await DeviceNotificationService.instance.init();
 
   runApp(
     ProviderScope(

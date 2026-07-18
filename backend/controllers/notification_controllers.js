@@ -4,18 +4,22 @@ import {
   markNotificationAsRead,
   markAllNotificationsAsRead,
   deleteNotification,
+  broadcastNotification,
 } from "../services/notification_service.js";
+import {
+  registerDeviceToken,
+  removeDeviceToken,
+} from "../services/push_service.js";
 
 /**
- * Get user notifications
  * GET /api/v1/notifications
  */
 export const getNotifications = async (req, res) => {
   try {
     const { limit = 50, skip = 0 } = req.query;
     const result = await getUserNotifications(req.user._id, {
-      limit: parseInt(limit),
-      skip: parseInt(skip),
+      limit: parseInt(limit, 10),
+      skip: parseInt(skip, 10),
     });
 
     res.status(200).json(result);
@@ -28,7 +32,6 @@ export const getNotifications = async (req, res) => {
 };
 
 /**
- * Get single notification
  * GET /api/v1/notifications/:id
  */
 export const getNotification = async (req, res) => {
@@ -44,7 +47,6 @@ export const getNotification = async (req, res) => {
 };
 
 /**
- * Mark notification as read
  * PATCH /api/v1/notifications/:id/read
  */
 export const markAsRead = async (req, res) => {
@@ -63,7 +65,6 @@ export const markAsRead = async (req, res) => {
 };
 
 /**
- * Mark all notifications as read
  * PATCH /api/v1/notifications/read-all
  */
 export const markAllAsRead = async (req, res) => {
@@ -79,7 +80,6 @@ export const markAllAsRead = async (req, res) => {
 };
 
 /**
- * Delete notification
  * DELETE /api/v1/notifications/:id
  */
 export const deleteNotificationController = async (req, res) => {
@@ -95,7 +95,6 @@ export const deleteNotificationController = async (req, res) => {
 };
 
 /**
- * Get unread count
  * GET /api/v1/notifications/unread-count
  */
 export const getUnreadCount = async (req, res) => {
@@ -108,6 +107,59 @@ export const getUnreadCount = async (req, res) => {
     console.error("Get unread count error:", error);
     res.status(500).json({
       message: error.message || "Failed to get unread count",
+    });
+  }
+};
+
+/**
+ * POST /api/v1/notifications/device-token
+ * Body: { token, platform? }
+ */
+export const saveDeviceToken = async (req, res) => {
+  try {
+    const { token, platform } = req.body || {};
+    const result = await registerDeviceToken(req.user._id, token, platform);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(error.statusCode || 400).json({
+      message: error.message || "Failed to register device token",
+    });
+  }
+};
+
+/**
+ * DELETE /api/v1/notifications/device-token
+ * Body: { token }
+ */
+export const deleteDeviceToken = async (req, res) => {
+  try {
+    const { token } = req.body || {};
+    if (!token) {
+      return res.status(400).json({ message: "token is required" });
+    }
+    const result = await removeDeviceToken(req.user._id, token);
+    res.status(200).json(result);
+  } catch (error) {
+    res.status(400).json({
+      message: error.message || "Failed to remove device token",
+    });
+  }
+};
+
+/**
+ * POST /api/v1/admin/notifications/broadcast
+ * Body: { title, message, type?, actionUrl?, userIds? }
+ */
+export const broadcast = async (req, res) => {
+  try {
+    const result = await broadcastNotification(req.body || {});
+    res.status(201).json({
+      message: "Notifications sent",
+      ...result,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 400).json({
+      message: error.message || "Broadcast failed",
     });
   }
 };
