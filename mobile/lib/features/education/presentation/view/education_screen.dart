@@ -50,12 +50,23 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
         isAmharic: isAmharic,
         onSelect: (age) async {
           ref.read(isEducationAgeSelectedProvider.notifier).state = true;
-          final ds = ref.read(educationRemoteDataSourceProvider);
-          final list = await ds.getVideosByAge(age);
-          if (mounted) setState(() {
-            _selectedAge = age;
-            _videos = list;
-          });
+          ref.invalidate(educationViewModelProvider(age));
+          try {
+            final list = await ref.read(educationViewModelProvider(age).future);
+            if (mounted) {
+              setState(() {
+                _selectedAge = age;
+                _videos = list;
+              });
+            }
+          } catch (_) {
+            if (mounted) {
+              setState(() {
+                _selectedAge = age;
+                _videos = [];
+              });
+            }
+          }
         },
       );
     }
@@ -105,9 +116,23 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
 
     return Stack(
       children: [
-        ListView.builder(
-          padding: EdgeInsets.only(left: 12, right: 12, top: 80, bottom: 120),
-          itemCount: _videos.length,
+        RefreshIndicator(
+          color: AppColors.orange500,
+          onRefresh: () async {
+            if (_selectedAge == null) return;
+            ref.invalidate(educationViewModelProvider(_selectedAge!));
+            try {
+              final list =
+                  await ref.read(educationViewModelProvider(_selectedAge!).future);
+              if (mounted) setState(() => _videos = list);
+            } catch (_) {
+              if (mounted) setState(() => _videos = []);
+            }
+          },
+          child: ListView.builder(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: EdgeInsets.only(left: 12, right: 12, top: 80, bottom: 120),
+            itemCount: _videos.length,
           itemBuilder: (context, i) {
             final v = _videos[i];
             return Padding(
@@ -200,6 +225,7 @@ class _EducationScreenState extends ConsumerState<EducationScreen> {
             );
           },
         ),
+        ),
         Positioned(
           top: MediaQuery.paddingOf(context).top + 8,
           left: 24,
@@ -268,9 +294,9 @@ class _AgeSelection extends StatelessWidget {
             child: Icon(Icons.school_rounded, color: AppColors.orange600, size: 32),
           ),
           const SizedBox(height: 16),
-          Text(title, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.grey.shade900)),
+          Text(title, style: TextStyle(fontSize: 32, fontWeight: FontWeight.w900, color: Colors.grey.shade900, decoration: TextDecoration.none)),
           const SizedBox(height: 8),
-          Text(subtitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade500)),
+          Text(subtitle, style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.grey.shade500, decoration: TextDecoration.none)),
           const SizedBox(height: 48),
           ...List.generate(ageGroups.length, (i) {
             final g = ageGroups[i];
@@ -297,11 +323,11 @@ class _AgeSelection extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              Text(ageWord, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white.withValues(alpha: 0.6))),
-                              Text(ageLabels[i], style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, height: 1)),
+                              Text(ageWord, style: TextStyle(fontSize: 18, fontWeight: FontWeight.w900, color: Colors.white.withValues(alpha: 0.6), decoration: TextDecoration.none)),
+                              Text(ageLabels[i], style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Colors.white, height: 1, decoration: TextDecoration.none)),
                             ],
                           ),
-                          Text(g.icon, style: const TextStyle(fontSize: 56)),
+                          Text(g.icon, style: const TextStyle(fontSize: 56, decoration: TextDecoration.none)),
                         ],
                       ),
                     ),

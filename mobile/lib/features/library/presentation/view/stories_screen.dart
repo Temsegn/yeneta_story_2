@@ -92,11 +92,31 @@ class _StoriesScreenState extends ConsumerState<StoriesScreen> {
     return Stack(
       children: [
         state.when(
-          data: (list) => _buildContent(list),
+          data: (list) => RefreshIndicator(
+            color: AppColors.orange500,
+            onRefresh: () async {
+              ref.invalidate(storiesViewModelProvider(_storiesFilter));
+              await ref.read(storiesViewModelProvider(_storiesFilter).future);
+            },
+            child: _buildContent(list),
+          ),
           loading: () => const Center(
             child: CircularProgressIndicator(color: AppColors.orange500),
           ),
-          error: (e, _) => Center(child: Text('$e')),
+          error: (e, _) => RefreshIndicator(
+            color: AppColors.orange500,
+            onRefresh: () async {
+              ref.invalidate(storiesViewModelProvider(_storiesFilter));
+              await ref.read(storiesViewModelProvider(_storiesFilter).future);
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: [
+                SizedBox(height: 120),
+                Center(child: Text('$e')),
+              ],
+            ),
+          ),
         ),
         if (_opening)
           Container(
@@ -108,8 +128,15 @@ class _StoriesScreenState extends ConsumerState<StoriesScreen> {
     );
   }
 
+  void _selectFilter(bool stories) {
+    setState(() => _storiesFilter = stories);
+    // Always hit the backend when switching Stories ↔ Books.
+    ref.invalidate(storiesViewModelProvider(stories));
+  }
+
   Widget _buildContent(List<StoryEntity> list) {
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: EdgeInsets.only(left: 16, right: 16, top: 24, bottom: 120),
       child: Column(
         children: [
@@ -121,7 +148,7 @@ class _StoriesScreenState extends ConsumerState<StoriesScreen> {
                   icon: Icons.menu_book_rounded,
                   isActive: _storiesFilter,
                   gradient: AppColors.primaryButtonGradient,
-                  onTap: () => setState(() => _storiesFilter = true),
+                  onTap: () => _selectFilter(true),
                 ),
               ),
               const SizedBox(width: 12),
@@ -131,7 +158,7 @@ class _StoriesScreenState extends ConsumerState<StoriesScreen> {
                   icon: Icons.book_rounded,
                   isActive: !_storiesFilter,
                   gradient: const LinearGradient(colors: [Color(0xFF4ADE80), Color(0xFF059669)]),
-                  onTap: () => setState(() => _storiesFilter = false),
+                  onTap: () => _selectFilter(false),
                 ),
               ),
             ],

@@ -17,23 +17,56 @@ class VideoScreen extends ConsumerWidget {
     return state.when(
       data: (videos) {
         if (videos.isEmpty) {
-          return const EmptyStateWidget(
-            emoji: '🎬',
-            title: 'ምንም ቪዲዮዎች የሉም',
-            message: 'በቅርቡ አዲስ ቪዲዮዎች ይመጣሉ!\nበኋላ ይመልከቱ 🌟',
-            primaryColor: Color(0xFFF97316),
-            secondaryColor: Color(0xFFFB923C),
+          return RefreshIndicator(
+            color: AppColors.orange500,
+            onRefresh: () async {
+              ref.invalidate(videoListViewModelProvider);
+              await ref.read(videoListViewModelProvider.future);
+            },
+            child: ListView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              children: const [
+                SizedBox(height: 120),
+                EmptyStateWidget(
+                  emoji: '🎬',
+                  title: 'ምንም ቪዲዮዎች የሉም',
+                  message: 'በቅርቡ አዲስ ቪዲዮዎች ይመጣሉ!\nበኋላ ይመልከቱ 🌟',
+                  primaryColor: Color(0xFFF97316),
+                  secondaryColor: Color(0xFFFB923C),
+                ),
+              ],
+            ),
           );
         }
-        return _VideoListContent(videos: videos, ref: ref);
+        return RefreshIndicator(
+          color: AppColors.orange500,
+          onRefresh: () async {
+            ref.invalidate(videoListViewModelProvider);
+            await ref.read(videoListViewModelProvider.future);
+          },
+          child: _VideoListContent(videos: videos, ref: ref),
+        );
       },
       loading: () => const Center(child: CircularProgressIndicator(color: AppColors.orange500)),
-      error: (e, _) => const EmptyStateWidget(
-        emoji: '🎬',
-        title: 'ምንም ቪዲዮዎች የሉም',
-        message: 'በቅርቡ አዲስ ቪዲዮዎች ይመጣሉ!\nበኋላ ይመልከቱ 🌟',
-        primaryColor: Color(0xFFF97316),
-        secondaryColor: Color(0xFFFB923C),
+      error: (e, _) => RefreshIndicator(
+        color: AppColors.orange500,
+        onRefresh: () async {
+          ref.invalidate(videoListViewModelProvider);
+          await ref.read(videoListViewModelProvider.future);
+        },
+        child: ListView(
+          physics: const AlwaysScrollableScrollPhysics(),
+          children: const [
+            SizedBox(height: 120),
+            EmptyStateWidget(
+              emoji: '🎬',
+              title: 'ምንም ቪዲዮዎች የሉም',
+              message: 'በቅርቡ አዲስ ቪዲዮዎች ይመጣሉ!\nበኋላ ይመልከቱ 🌟',
+              primaryColor: Color(0xFFF97316),
+              secondaryColor: Color(0xFFFB923C),
+            ),
+          ],
+        ),
       ),
     );
   }

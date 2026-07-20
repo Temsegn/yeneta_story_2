@@ -33,7 +33,14 @@ class HomeScreen extends ConsumerWidget {
       body: Stack(
         children: [
           state.when(
-            data: (videos) => _HomeContent(videos: videos, ref: ref),
+            data: (videos) => RefreshIndicator(
+              color: AppColors.orange500,
+              onRefresh: () async {
+                ref.invalidate(homeViewModelProvider);
+                await ref.read(homeViewModelProvider.future);
+              },
+              child: _HomeContent(videos: videos, ref: ref),
+            ),
             loading: () => const Center(child: CircularProgressIndicator(color: AppColors.orange500)),
             error: (e, stack) {
               // Show a friendly error message instead of raw error
@@ -214,6 +221,7 @@ class _HomeContent extends StatelessWidget {
         : (accessInfo?.fullName ?? user.fullName);
 
     return SingleChildScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
       padding: const EdgeInsets.only(left: 24, right: 24, top: 16, bottom: 140),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

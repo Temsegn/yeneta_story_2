@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:kids_app/core/base/constants.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
+import 'package:kids_app/features/shell/presentation/content_refresh.dart';
 import 'package:kids_app/features/shell/presentation/viewmodel/shell_viewmodel.dart';
 import 'dart:math' as math;
 
@@ -13,7 +14,10 @@ class BottomNav extends ConsumerWidget {
     final activeTab = ref.watch(shellViewModelProvider);
     return _BottomNavContent(
       activeTab: activeTab,
-      onTabSelected: (tab) => ref.read(shellViewModelProvider.notifier).setTab(tab),
+      onTabSelected: (tab) {
+        ref.read(shellViewModelProvider.notifier).setTab(tab);
+        refreshContentForTab(ref, tab);
+      },
     );
   }
 }

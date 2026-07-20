@@ -1,8 +1,8 @@
-import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:kids_app/core/theme/app_colors.dart';
 import 'package:kids_app/core/widgets/content_network_image.dart';
 import 'package:kids_app/features/education/domain/entities/education_video_entity.dart';
+import 'package:video_player/video_player.dart';
 
 class EducationVideoDetailScreen extends StatefulWidget {
   final List<EducationVideoEntity> videos;
@@ -17,176 +17,274 @@ class EducationVideoDetailScreen extends StatefulWidget {
   });
 
   @override
-  State<EducationVideoDetailScreen> createState() => _EducationVideoDetailScreenState();
+  State<EducationVideoDetailScreen> createState() =>
+      _EducationVideoDetailScreenState();
 }
 
-class _EducationVideoDetailScreenState extends State<EducationVideoDetailScreen> {
+class _EducationVideoDetailScreenState
+    extends State<EducationVideoDetailScreen> {
   late int _currentIndex;
-  double _progress = 0;
-  Timer? _timer;
+  VideoPlayerController? _controller;
+  String? _loadedUrl;
+  bool _ready = false;
+  bool _hasError = false;
+  bool _showControls = true;
 
   @override
   void initState() {
     super.initState();
     _currentIndex = widget.initialIndex.clamp(0, widget.videos.length - 1);
-    _startProgress();
-  }
-
-  void _startProgress() {
-    _timer?.cancel();
-    _progress = 0;
-    _timer = Timer.periodic(const Duration(milliseconds: 100), (_) {
-      if (mounted) setState(() => _progress = _progress >= 100 ? 0 : _progress + 0.5);
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _loadCurrent());
   }
 
   @override
   void dispose() {
-    _timer?.cancel();
+    _disposeController();
     super.dispose();
   }
 
-  int _parseDuration(String d) {
-    final parts = d.split(':');
-    if (parts.length >= 2) {
-      final m = int.tryParse(parts[0]) ?? 0;
-      final s = int.tryParse(parts[1]) ?? 0;
-      return m * 60 + s;
-    }
-    return 300;
+  void _disposeController() {
+    _controller?.removeListener(_onTick);
+    _controller?.dispose();
+    _controller = null;
+    _loadedUrl = null;
+    _ready = false;
   }
 
-  String _formatTime(int seconds) {
-    final m = seconds ~/ 60;
-    final s = seconds % 60;
-    return '$m:${s.toString().padLeft(2, '0')}';
+  void _onTick() {
+    if (mounted) setState(() {});
   }
 
-  void _onVerticalDrag(double delta) {
-    if (delta > 50 && _currentIndex < widget.videos.length - 1) {
+  EducationVideoEntity get _video =>
+      widget.videos[_currentIndex.clamp(0, widget.videos.length - 1)];
+
+  Future<void> _loadCurrent() async {
+    final url = _video.videoUrl.trim();
+    if (url.isEmpty) {
       setState(() {
-        _currentIndex++;
-        _startProgress();
+        _hasError = true;
+        _ready = false;
       });
-    } else if (delta < -50 && _currentIndex > 0) {
+      return;
+    }
+    if (_loadedUrl == url && _controller != null) return;
+
+    _disposeController();
+    setState(() {
+      _hasError = false;
+      _ready = false;
+      _showControls = true;
+    });
+
+    try {
+      final controller = VideoPlayerController.networkUrl(Uri.parse(url));
+      _controller = controller;
+      _loadedUrl = url;
+      controller.addListener(_onTick);
+      await controller.initialize();
+      await controller.play();
+      if (!mounted) return;
+      setState(() => _ready = true);
+    } catch (_) {
+      if (!mounted) return;
       setState(() {
-        _currentIndex--;
-        _startProgress();
+        _hasError = true;
+        _ready = false;
       });
     }
+  }
+
+  void _togglePlay() {
+    final c = _controller;
+    if (c == null || !_ready) return;
+    if (c.value.isPlaying) {
+      c.pause();
+    } else {
+      c.play();
+    }
+    setState(() {});
+  }
+
+  void _goTo(int index) {
+    if (index < 0 || index >= widget.videos.length) return;
+    setState(() => _currentIndex = index);
+    _loadCurrent();
+  }
+
+  String _formatDuration(Duration d) {
+    final m = d.inMinutes.remainder(60).toString();
+    final s = d.inSeconds.remainder(60).toString().padLeft(2, '0');
+    return '$m:$s';
   }
 
   @override
   Widget build(BuildContext context) {
     if (widget.videos.isEmpty) return const SizedBox.shrink();
-    final video = widget.videos[_currentIndex.clamp(0, widget.videos.length - 1)];
-    final totalSec = _parseDuration(video.duration);
-    final currentSec = ((_progress / 100) * totalSec).floor();
+    final video = _video;
+    final safe = MediaQuery.viewPaddingOf(context);
+    final c = _controller;
+    final position = c?.value.position ?? Duration.zero;
+    final duration = c?.value.duration ?? Duration.zero;
+    final progress = duration.inMilliseconds == 0
+        ? 0.0
+        : (position.inMilliseconds / duration.inMilliseconds).clamp(0.0, 1.0);
+    final playing = c?.value.isPlaying ?? false;
 
-    return GestureDetector(
-      onVerticalDragEnd: (d) => _onVerticalDrag(-d.velocity.pixelsPerSecond.dy),
-      child: Container(
-        color: Colors.black,
+    return Material(
+      color: Colors.black,
+      child: GestureDetector(
+        onVerticalDragEnd: (d) {
+          final dy = -d.velocity.pixelsPerSecond.dy;
+          if (dy > 50) {
+            _goTo(_currentIndex + 1);
+          } else if (dy < -50) {
+            _goTo(_currentIndex - 1);
+          }
+        },
         child: Stack(
           fit: StackFit.expand,
           children: [
-            ContentNetworkImage(url: video.thumbnail),
-            Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [Colors.black.withValues(alpha: 0.2), Colors.transparent, Colors.black.withValues(alpha: 0.4)],
+            if (!_ready || _hasError)
+              ContentNetworkImage(url: video.thumbnail),
+            if (_ready && c != null && c.value.isInitialized)
+              GestureDetector(
+                onTap: () => setState(() => _showControls = !_showControls),
+                child: Center(
+                  child: AspectRatio(
+                    aspectRatio:
+                        c.value.aspectRatio == 0 ? 16 / 9 : c.value.aspectRatio,
+                    child: VideoPlayer(c),
+                  ),
                 ),
               ),
-            ),
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 8,
-              left: 24,
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: widget.onBack,
-                  borderRadius: BorderRadius.circular(28),
-                  child: Container(
-                    width: 56,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      gradient: AppColors.primaryButtonGradient,
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [BoxShadow(color: Colors.black38, blurRadius: 16)],
+            if (!_ready && !_hasError)
+              const Center(
+                child: CircularProgressIndicator(color: AppColors.orange500),
+              ),
+            if (_hasError)
+              const Center(
+                child: Padding(
+                  padding: EdgeInsets.all(24),
+                  child: Text(
+                    'Could not play this video.',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      decoration: TextDecoration.none,
                     ),
-                    child: const Icon(Icons.arrow_back, color: Colors.white, size: 28),
                   ),
                 ),
               ),
-            ),
-            Positioned(
-              top: MediaQuery.paddingOf(context).top + 32,
-              right: 32,
-              left: 100,
-              child: Text(
-                video.title,
-                style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w900),
-                textAlign: TextAlign.end,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+            if (_showControls || !_ready || _hasError)
+              Positioned(
+                top: 8 + safe.top,
+                left: 16,
+                right: 16,
+                child: Row(
+                  children: [
+                    Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: widget.onBack,
+                        borderRadius: BorderRadius.circular(24),
+                        child: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.black.withValues(alpha: 0.45),
+                            borderRadius: BorderRadius.circular(24),
+                          ),
+                          child: const Icon(
+                            Icons.arrow_back,
+                            color: Colors.white,
+                            size: 26,
+                          ),
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: Text(
+                        video.title,
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 16,
+                          fontWeight: FontWeight.w800,
+                          decoration: TextDecoration.none,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
-            Positioned(
-              bottom: 32,
-              left: 32,
-              right: 32,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(_formatTime(currentSec), style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14, fontWeight: FontWeight.bold)),
-                      Text(video.duration, style: TextStyle(color: Colors.white.withValues(alpha: 0.9), fontSize: 14, fontWeight: FontWeight.bold)),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  LayoutBuilder(
-                    builder: (context, constraints) {
-                      final w = constraints.maxWidth;
-                      return Stack(
-                        alignment: Alignment.centerLeft,
-                        children: [
-                          Container(
-                            height: 6,
-                            width: w,
-                            decoration: BoxDecoration(color: Colors.white.withValues(alpha: 0.3), borderRadius: BorderRadius.circular(3)),
+            if (_ready && _showControls && !_hasError)
+              Positioned(
+                left: 16,
+                right: 16,
+                bottom: 24 + safe.bottom,
+                child: Row(
+                  children: [
+                    IconButton(
+                      onPressed: _togglePlay,
+                      icon: Icon(
+                        playing
+                            ? Icons.pause_circle_filled
+                            : Icons.play_circle_filled,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                    ),
+                    Text(
+                      _formatDuration(position),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                    Expanded(
+                      child: SliderTheme(
+                        data: SliderTheme.of(context).copyWith(
+                          trackHeight: 3,
+                          thumbShape: const RoundSliderThumbShape(
+                            enabledThumbRadius: 7,
                           ),
-                          Container(
-                            height: 6,
-                            width: w * (_progress / 100),
-                            decoration: BoxDecoration(
-                              gradient: LinearGradient(colors: [AppColors.orange400, AppColors.red500]),
-                              borderRadius: BorderRadius.circular(3),
-                            ),
-                          ),
-                          Positioned(
-                            left: (w * (_progress / 100)).clamp(0.0, w - 20) - 10,
-                            child: Container(
-                              width: 20,
-                              height: 20,
-                              decoration: BoxDecoration(
-                                color: Colors.white,
-                                shape: BoxShape.circle,
-                                border: Border.all(color: AppColors.orange400, width: 2),
-                                boxShadow: [BoxShadow(color: Colors.black26, blurRadius: 8)],
+                          activeTrackColor: AppColors.orange400,
+                          inactiveTrackColor:
+                              Colors.white.withValues(alpha: 0.3),
+                          thumbColor: Colors.white,
+                        ),
+                        child: Slider(
+                          value: progress,
+                          onChanged: (v) {
+                            if (duration.inMilliseconds == 0) return;
+                            _controller?.seekTo(
+                              Duration(
+                                milliseconds:
+                                    (v * duration.inMilliseconds).round(),
                               ),
-                            ),
-                          ),
-                        ],
-                      );
-                    },
-                  ),
-                ],
+                            );
+                          },
+                        ),
+                      ),
+                    ),
+                    Text(
+                      _formatDuration(duration),
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        decoration: TextDecoration.none,
+                      ),
+                    ),
+                  ],
+                ),
               ),
-            ),
           ],
         ),
       ),

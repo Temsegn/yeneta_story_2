@@ -1,5 +1,4 @@
 import 'package:dio/dio.dart';
-import '../../../../core/data/sample_data.dart';
 import '../../../../core/network/api_config.dart';
 import '../../../../core/network/api_exception.dart';
 import '../models/video_model.dart';
@@ -20,16 +19,15 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
     try {
       final response = await _dio.get(
         ApiConfig.videos,
-        queryParameters: {'page': 1, 'limit': 4},
+        queryParameters: {'page': 1, 'limit': 20},
       );
 
       final videos = (response.data['videos'] as List)
           .map((json) => VideoModel.fromJson(json))
           .toList();
-      // Fall back to sample content when the backend has no videos yet.
-      return videos.isEmpty ? SampleData.videos() : videos;
-    } catch (_) {
-      return SampleData.videos();
+      return videos;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
     }
   }
 
@@ -38,16 +36,15 @@ class VideoRemoteDataSourceImpl implements VideoRemoteDataSource {
     try {
       final response = await _dio.get(
         ApiConfig.videos,
-        queryParameters: {'page': 1, 'limit': 10},
+        queryParameters: {'page': 1, 'limit': 50},
       );
 
       final videos = (response.data['videos'] as List)
           .map((json) => VideoModel.fromJson(json))
           .toList();
-      return videos.isEmpty ? SampleData.videos() : videos;
-    } catch (_) {
-      // Show sample content instead of an empty screen.
-      return SampleData.videos();
+      return videos;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
     }
   }
 

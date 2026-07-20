@@ -1,11 +1,9 @@
 import 'package:dio/dio.dart';
-import '../../../../core/data/sample_data.dart';
 import '../../../../core/network/api_config.dart';
 import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/story_entity.dart';
 
-/// Fetches stories/books from the backend and falls back to sample data
-/// when the backend has no content or is unreachable.
+/// Fetches stories/books from the backend.
 abstract class StoryRemoteDataSource {
   Future<List<StoryEntity>> getStories();
   Future<List<StoryEntity>> getBooks();
@@ -20,12 +18,12 @@ class StoryRemoteDataSourceImpl implements StoryRemoteDataSource {
 
   @override
   Future<List<StoryEntity>> getStories() async {
-    return _fetchList(ApiConfig.stories, 'stories', SampleData.stories());
+    return _fetchList(ApiConfig.stories, 'stories');
   }
 
   @override
   Future<List<StoryEntity>> getBooks() async {
-    return _fetchList(ApiConfig.books, 'books', SampleData.books());
+    return _fetchList(ApiConfig.books, 'books');
   }
 
   @override
@@ -38,30 +36,23 @@ class StoryRemoteDataSourceImpl implements StoryRemoteDataSource {
     return _fetchDetail('${ApiConfig.books}/$id');
   }
 
-  Future<List<StoryEntity>> _fetchList(
-    String path,
-    String key,
-    List<StoryEntity> fallback,
-  ) async {
+  Future<List<StoryEntity>> _fetchList(String path, String key) async {
     try {
       final response = await _dio.get(
         path,
-        queryParameters: {'page': 1, 'limit': 20},
+        queryParameters: {'page': 1, 'limit': 50},
       );
       final data = response.data;
       final rawList = (data is Map && data[key] is List)
           ? data[key] as List
           : (data is List ? data : const []);
 
-      final items = rawList
+      return rawList
           .whereType<Map>()
           .map((item) => _mapToEntity(Map<String, dynamic>.from(item)))
           .toList();
-
-      // If the backend has no data yet, show sample content.
-      return items.isEmpty ? fallback : items;
-    } catch (_) {
-      return fallback;
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
     }
   }
 

@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
-import '../../../../core/data/sample_data.dart';
 import '../../../../core/network/api_config.dart';
+import '../../../../core/network/api_exception.dart';
 import '../../domain/entities/education_video_entity.dart';
 
 abstract class EducationRemoteDataSource {
@@ -24,24 +24,23 @@ class EducationRemoteDataSourceImpl implements EducationRemoteDataSource {
         },
       );
 
-      final list = (response.data['education'] as List? ?? [])
-          .map((json) {
-            final map = json as Map<String, dynamic>;
-            return EducationVideoEntity(
-              id: (map['_id'] ?? map['id'] ?? '').hashCode,
-              title: map['title'] as String? ?? '',
-              thumbnail: map['thumbnail'] as String? ?? '',
-              duration: map['duration'] as String? ?? '',
-              description: map['description'] as String? ?? '',
-              author: map['author'] as String? ?? 'Yeneta',
-              isPremium: map['isPremium'] as bool? ?? false,
-            );
-          })
-          .toList();
-
-      return list.isEmpty ? SampleData.educationVideos() : list;
-    } catch (_) {
-      return SampleData.educationVideos();
+      return (response.data['education'] as List? ?? []).map((json) {
+        final map = json as Map<String, dynamic>;
+        final apiId = (map['_id'] ?? map['id'] ?? '').toString();
+        return EducationVideoEntity(
+          id: apiId.hashCode,
+          apiId: apiId,
+          title: map['title'] as String? ?? '',
+          thumbnail: map['thumbnail'] as String? ?? '',
+          duration: map['duration'] as String? ?? '',
+          description: map['description'] as String? ?? '',
+          author: map['author'] as String? ?? 'Yeneta',
+          videoUrl: map['videoUrl'] as String? ?? '',
+          isPremium: map['isPremium'] as bool? ?? false,
+        );
+      }).toList();
+    } on DioException catch (e) {
+      throw ApiException.fromDioError(e);
     }
   }
 }
