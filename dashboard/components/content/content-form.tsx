@@ -139,18 +139,21 @@ export function ContentForm({ kind, id }: Props) {
     setLoading(true);
     setError("");
     try {
-      if (!coverUrl.trim()) {
+      if (!(coverUrl || "").trim()) {
         throw new Error("Please upload a cover/thumbnail image first.");
       }
-      if ((kind === "videos" || kind === "education") && !mediaUrl.trim()) {
+      if (
+        (kind === "videos" || kind === "education") &&
+        !(mediaUrl || "").trim()
+      ) {
         throw new Error("Please upload a video file first.");
       }
       if (kind === "videos") {
         const body = {
-          title,
-          description,
-          videoUrl: mediaUrl,
-          thumbnail: coverUrl,
+          title: title.trim(),
+          description: description.trim(),
+          videoUrl: mediaUrl.trim(),
+          thumbnail: coverUrl.trim(),
           isPremium,
           isVisible,
         };
@@ -159,9 +162,9 @@ export function ContentForm({ kind, id }: Props) {
         router.push("/videos");
       } else if (kind === "stories") {
         const body = {
-          title,
-          description,
-          coverImageUrl: coverUrl,
+          title: title.trim(),
+          description: description.trim(),
+          coverImageUrl: coverUrl.trim(),
           isPremium,
           isVisible,
           pages: pages as StoryPage[],
@@ -171,9 +174,9 @@ export function ContentForm({ kind, id }: Props) {
         router.push("/stories");
       } else if (kind === "books") {
         const body = {
-          title,
-          description,
-          coverImageUrl: coverUrl,
+          title: title.trim(),
+          description: description.trim(),
+          coverImageUrl: coverUrl.trim(),
           isPremium,
           isVisible,
           pages: pages as BookPage[],
@@ -183,10 +186,10 @@ export function ContentForm({ kind, id }: Props) {
         router.push("/books");
       } else {
         const body = {
-          title,
-          description,
-          videoUrl: mediaUrl,
-          thumbnail: coverUrl,
+          title: title.trim(),
+          description: description.trim(),
+          videoUrl: mediaUrl.trim(),
+          thumbnail: coverUrl.trim(),
           duration,
           author,
           ageGroup,

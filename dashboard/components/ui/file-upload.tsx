@@ -84,6 +84,9 @@ export function FileUpload({
 
     try {
       const result = await uploadFile(file, setProgress);
+      if (!result?.url || typeof result.url !== "string") {
+        throw new Error("Upload succeeded but no file URL was returned.");
+      }
       setMeta({
         filename: result.filename || file.name,
         size: result.bytes || result.size || file.size,

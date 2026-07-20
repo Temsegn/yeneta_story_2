@@ -216,6 +216,11 @@ export const uploadFile = handle(async (req, res) => {
     });
 
     const url = uploaded.delivery_url || uploaded.secure_url;
+    if (!url) {
+      return res.status(502).json({
+        message: "Cloudinary upload completed without a delivery URL.",
+      });
+    }
 
     res.status(201).json({
       url,

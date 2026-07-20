@@ -11,7 +11,28 @@ import { notifyContentReleasedSafe } from "../services/notification_service.js";
 
 export const createVideo = async (req, res) => {
   try {
-    const video = await createVideoService(req.body, req.user._id);
+    const { title, description, videoUrl, thumbnail } = req.body || {};
+    if (!title?.trim() || !description?.trim()) {
+      return res
+        .status(400)
+        .json({ message: "Title and description are required" });
+    }
+    if (!videoUrl?.trim() || !thumbnail?.trim()) {
+      return res
+        .status(400)
+        .json({ message: "Video file and thumbnail are required" });
+    }
+
+    const video = await createVideoService(
+      {
+        ...req.body,
+        title: title.trim(),
+        description: description.trim(),
+        videoUrl: videoUrl.trim(),
+        thumbnail: thumbnail.trim(),
+      },
+      req.user._id
+    );
     res.status(201).json(video);
 
     await logAction({

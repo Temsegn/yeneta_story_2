@@ -123,7 +123,17 @@ export async function uploadFile(
     };
 
     xhr.onload = () => {
-      const data = xhr.response || {};
+      const raw = xhr.response;
+      const data =
+        typeof raw === "string"
+          ? (() => {
+              try {
+                return JSON.parse(raw);
+              } catch {
+                return {};
+              }
+            })()
+          : raw || {};
       if (xhr.status === 401) {
         clearSession();
         if (typeof window !== "undefined") window.location.href = "/login";
@@ -138,6 +148,10 @@ export async function uploadFile(
               : `Upload failed (${xhr.status})`
           )
         );
+        return;
+      }
+      if (!data?.url || typeof data.url !== "string") {
+        reject(new Error("Upload succeeded but no file URL was returned."));
         return;
       }
       resolve(data as UploadResult);
