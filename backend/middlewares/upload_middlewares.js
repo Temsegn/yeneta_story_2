@@ -36,6 +36,15 @@ function fileFilter(_req, file, cb) {
     cb(null, true);
     return;
   }
+  // Some phones/apps send mp4 as octet-stream.
+  const name = String(file.originalname || "").toLowerCase();
+  if (
+    (file.mimetype === "application/octet-stream" || !file.mimetype) &&
+    /\.(mp4|webm|mov|m4v|png|jpe?g|webp|gif|mp3|wav|pdf)$/i.test(name)
+  ) {
+    cb(null, true);
+    return;
+  }
   cb(new Error(`Unsupported file type: ${file.mimetype}`));
 }
 

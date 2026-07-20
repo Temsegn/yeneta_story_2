@@ -215,10 +215,12 @@ export const uploadFile = handle(async (req, res) => {
       originalname: req.file.originalname,
     });
 
-    const url = uploaded.delivery_url || uploaded.secure_url;
+    const url = uploaded.delivery_url || uploaded.secure_url || uploaded.url;
     if (!url) {
       return res.status(502).json({
         message: "Cloudinary upload completed without a delivery URL.",
+        publicId: uploaded.public_id || null,
+        kind: uploaded.kind || null,
       });
     }
 

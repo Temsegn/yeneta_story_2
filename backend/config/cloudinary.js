@@ -1,3 +1,4 @@
+import fs from "fs";
 import { v2 as cloudinary } from "cloudinary";
 
 function getCloudinaryEnv() {
@@ -35,9 +36,20 @@ export function assertCloudinaryConfigured() {
 }
 
 function detectKind(mimetype = "", originalname = "") {
-  if (mimetype.startsWith("video/")) return "video";
-  if (mimetype.startsWith("audio/")) return "audio";
-  if (mimetype === "application/pdf" || originalname.toLowerCase().endsWith(".pdf")) {
+  const name = String(originalname || "").toLowerCase();
+  if (
+    mimetype.startsWith("video/") ||
+    /\.(mp4|webm|mov|m4v|mkv|avi)$/i.test(name)
+  ) {
+    return "video";
+  }
+  if (
+    mimetype.startsWith("audio/") ||
+    /\.(mp3|wav|m4a|aac|ogg)$/i.test(name)
+  ) {
+    return "audio";
+  }
+  if (mimetype === "application/pdf" || name.endsWith(".pdf")) {
     return "raw";
   }
   return "image";
@@ -49,6 +61,60 @@ function formatDuration(seconds) {
   const m = Math.floor(total / 60);
   const s = total % 60;
   return `${String(m).padStart(2, "0")}:${String(s).padStart(2, "0")}`;
+}
+
+/** Resolve a usable HTTPS delivery URL from a Cloudinary upload result. */
+function resolveDeliveryUrl(uploaded, resourceType) {
+  if (uploaded?.secure_url) return uploaded.secure_url;
+  if (uploaded?.url) {
+    return String(uploaded.url).replace(/^http:\/\//i, "https://");
+  }
+  if (uploaded?.public_id) {
+    return deliveryUrl(uploaded.public_id, resourceType);
+  }
+  return null;
+}
+
+/**
+ * upload_large may return a Promise or an UploadStream depending on SDK/input.
+ * Normalize both to a resolved upload result object.
+ */
+function awaitUpload(resultOrStream) {
+  if (
+    resultOrStream &&
+    typeof resultOrStream.then === "function"
+  ) {
+    return resultOrStream;
+  }
+  if (
+    resultOrStream &&
+    typeof resultOrStream.on === "function"
+  ) {
+    return new Promise((resolve, reject) => {
+      resultOrStream.on("error", reject);
+      // Some SDK builds emit the final payload on "end" / pipe finish.
+      let settled = false;
+      const finish = (payload) => {
+        if (settled) return;
+        settled = true;
+        if (payload && (payload.secure_url || payload.public_id)) {
+          resolve(payload);
+        } else {
+          reject(
+            new Error(
+              "Cloudinary video upload finished without a usable response payload."
+            )
+          );
+        }
+      };
+      resultOrStream.on("end", () => finish(resultOrStream));
+      // Newer SDK: promise-like helpers may attach .promise()
+      if (typeof resultOrStream.promise === "function") {
+        resultOrStream.promise().then(resolve).catch(reject);
+      }
+    });
+  }
+  return Promise.resolve(resultOrStream);
 }
 
 /** Fast CDN delivery URL with consistent cover sizing for images. */
@@ -133,34 +199,57 @@ export async function uploadToCloudinary(filePath, { mimetype, originalname } = 
 
     return {
       ...uploaded,
-      delivery_url: deliveryUrl(uploaded.public_id, "image"),
+      delivery_url: resolveDeliveryUrl(uploaded, "image") || deliveryUrl(uploaded.public_id, "image"),
       kind,
     };
   }
 
-  // Large videos: chunked upload is faster/more reliable on Render.
+  // Videos: use regular upload for typical sizes; chunked only for large files.
+  // Do not rely on eager_async (it can omit secure_url). Poster is generated via URL.
   if (kind === "video") {
-    const uploaded = await cloudinary.uploader.upload_large(filePath, {
-      ...baseOptions,
-      chunk_size: 6_000_000,
-      eager: [
-        {
-          width: 1280,
-          height: 720,
-          crop: "fill",
-          gravity: "auto",
-          start_offset: "0",
-          format: "jpg",
-          quality: "auto",
-        },
-      ],
-      eager_async: true,
-    });
+    let fileSize = 0;
+    try {
+      fileSize = fs.statSync(filePath).size;
+    } catch (_) {
+      fileSize = 0;
+    }
+
+    const LARGE_VIDEO_BYTES = 40 * 1024 * 1024; // 40MB
+    let uploaded;
+    if (fileSize > LARGE_VIDEO_BYTES) {
+      uploaded = await awaitUpload(
+        cloudinary.uploader.upload_large(filePath, {
+          ...baseOptions,
+          resource_type: "video",
+          chunk_size: 6_000_000,
+        })
+      );
+    } else {
+      uploaded = await cloudinary.uploader.upload(filePath, {
+        ...baseOptions,
+        resource_type: "video",
+      });
+    }
+
+    const delivery = resolveDeliveryUrl(uploaded, "video");
+    if (!delivery) {
+      const err = new Error(
+        "Cloudinary video upload completed without a delivery URL."
+      );
+      err.statusCode = 502;
+      err.details = {
+        keys: uploaded ? Object.keys(uploaded) : [],
+        public_id: uploaded?.public_id || null,
+      };
+      throw err;
+    }
 
     return {
       ...uploaded,
-      delivery_url: uploaded.secure_url,
-      poster_url: videoPosterUrl(uploaded.public_id),
+      delivery_url: delivery,
+      poster_url: uploaded.public_id
+        ? videoPosterUrl(uploaded.public_id)
+        : null,
       duration_label: formatDuration(uploaded.duration),
       kind,
     };
@@ -169,7 +258,7 @@ export async function uploadToCloudinary(filePath, { mimetype, originalname } = 
   const uploaded = await cloudinary.uploader.upload(filePath, baseOptions);
   return {
     ...uploaded,
-    delivery_url: uploaded.secure_url,
+    delivery_url: resolveDeliveryUrl(uploaded, baseOptions.resource_type),
     kind,
   };
 }
