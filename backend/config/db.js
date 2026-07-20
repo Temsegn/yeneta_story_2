@@ -2,6 +2,55 @@ import mongoose from "mongoose";
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
+/**
+ * Blank emails were stored as null/"" and collided on the unique email index.
+ * Clear those fields and ensure the partial unique index is in place.
+ */
+async function ensureOptionalEmailIndex() {
+  try {
+    const User = (await import("../models/user_model.js")).default;
+    const cleared = await User.updateMany(
+      {
+        $or: [
+          { email: null },
+          { email: "" },
+          { email: { $exists: true, $type: "string", $eq: "" } },
+        ],
+      },
+      { $unset: { email: 1 } }
+    );
+
+    const collection = User.collection;
+    const indexes = await collection.indexes();
+    for (const idx of indexes) {
+      const keys = Object.keys(idx.key || {});
+      if (
+        keys.length === 1 &&
+        keys[0] === "email" &&
+        idx.name !== "email_unique_nonempty"
+      ) {
+        try {
+          await collection.dropIndex(idx.name);
+          console.log(`Dropped legacy email index: ${idx.name}`);
+        } catch (err) {
+          if (err.code !== 27 && err.codeName !== "IndexNotFound") {
+            console.warn(`Could not drop index ${idx.name}:`, err.message);
+          }
+        }
+      }
+    }
+
+    await User.syncIndexes();
+    if (process.env.NODE_ENV !== "test" && cleared.modifiedCount) {
+      console.log(
+        `Cleared blank/null email on ${cleared.modifiedCount} user(s)`
+      );
+    }
+  } catch (err) {
+    console.warn("Optional email index setup skipped:", err.message);
+  }
+}
+
 const connectDB = async (attempt = 1) => {
   const maxAttempts = Number(process.env.MONGO_CONNECT_RETRIES) || 8;
   const retryDelayMs = Number(process.env.MONGO_CONNECT_RETRY_MS) || 3000;
@@ -17,6 +66,10 @@ const connectDB = async (attempt = 1) => {
 
     if (process.env.NODE_ENV !== "test") {
       console.log(`MongoDB Connected: ${conn.connection.host}`);
+    }
+
+    if (process.env.NODE_ENV !== "test") {
+      await ensureOptionalEmailIndex();
     }
 
     mongoose.connection.on("connected", () => {

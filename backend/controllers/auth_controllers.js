@@ -64,6 +64,17 @@ export const register = async (req, res) => {
       ipAddress: req.ip,
     });
   } catch (err) {
+    if (err?.code === 11000) {
+      const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
+      return res.status(409).json({
+        message:
+          field === "email"
+            ? "Email already registered"
+            : field === "phoneNumber"
+              ? "Phone number already registered"
+              : err.message,
+      });
+    }
     res.status(400).json({ message: err.message });
   }
 };
@@ -190,6 +201,17 @@ export const updateProfile = async (req, res) => {
       ipAddress: req.ip,
     });
   } catch (err) {
-    res.status(404).json({ message: err.message });
+    if (err?.code === 11000) {
+      const field = Object.keys(err.keyPattern || err.keyValue || {})[0];
+      return res.status(409).json({
+        message:
+          field === "email"
+            ? "Email already registered"
+            : field === "phoneNumber"
+              ? "Phone number already registered"
+              : err.message,
+      });
+    }
+    res.status(400).json({ message: err.message });
   }
 };

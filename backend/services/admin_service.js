@@ -123,8 +123,10 @@ export async function createUserService(data) {
   const existing = await User.findOne({ phoneNumber: normalizedPhone });
   if (existing) throw new Error("Phone number already registered");
 
-  if (email) {
-    const emailTaken = await User.findOne({ email: email.toLowerCase() });
+  const normalizedEmail =
+    email && String(email).trim() ? String(email).trim().toLowerCase() : null;
+  if (normalizedEmail) {
+    const emailTaken = await User.findOne({ email: normalizedEmail });
     if (emailTaken) throw new Error("Email already registered");
   }
 
@@ -132,16 +134,19 @@ export async function createUserService(data) {
   const safeRole = allowedRoles.includes(role) ? role : "parent";
 
   const hashed = await bcrypt.hash(password, 10);
-  return User.create({
+  const payload = {
     fullName,
     phoneNumber: normalizedPhone,
-    email: email ? email.toLowerCase() : undefined,
     password: hashed,
     role: safeRole,
     isActive,
     childProfiles: [],
     securityQuestion: securityQuestion || null,
-  });
+  };
+  // Omit email entirely when blank so unique index never sees null/"".
+  if (normalizedEmail) payload.email = normalizedEmail;
+
+  return User.create(payload);
 }
 
 export async function updateUserService(id, data) {
@@ -149,8 +154,22 @@ export async function updateUserService(id, data) {
   if (!user) throw new Error("User not found");
 
   if (data.fullName != null) user.fullName = data.fullName;
+  let clearEmail = false;
   if (data.email !== undefined) {
-    user.email = data.email ? String(data.email).toLowerCase() : null;
+    const normalizedEmail =
+      data.email && String(data.email).trim()
+        ? String(data.email).trim().toLowerCase()
+        : null;
+    if (normalizedEmail) {
+      const emailTaken = await User.findOne({
+        email: normalizedEmail,
+        _id: { $ne: user._id },
+      });
+      if (emailTaken) throw new Error("Email already registered");
+      user.email = normalizedEmail;
+    } else {
+      clearEmail = true;
+    }
   }
   if (data.phoneNumber) {
     user.phoneNumber = assertEthiopianPhone(data.phoneNumber);
@@ -187,6 +206,10 @@ export async function updateUserService(id, data) {
   }
 
   await user.save();
+  if (clearEmail) {
+    await User.updateOne({ _id: user._id }, { $unset: { email: 1 } });
+    return User.findById(user._id);
+  }
   return user;
 }
 

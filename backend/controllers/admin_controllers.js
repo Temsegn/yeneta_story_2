@@ -24,12 +24,22 @@ import {
 import { uploadToCloudinary } from "../config/cloudinary.js";
 import { logAction } from "../utils/auditLogger.js";
 
+const friendlyDbError = (err) => {
+  if (err?.code === 11000) {
+    const field = Object.keys(err.keyPattern || err.keyValue || {})[0] || "field";
+    if (field === "email") return "Email already registered";
+    if (field === "phoneNumber") return "Phone number already registered";
+    return `Duplicate ${field}`;
+  }
+  return err.message || "Request failed";
+};
+
 const handle = (fn) => async (req, res) => {
   try {
     await fn(req, res);
   } catch (err) {
-    const status = err.statusCode || 400;
-    res.status(status).json({ message: err.message || "Request failed" });
+    const status = err.code === 11000 ? 409 : err.statusCode || 400;
+    res.status(status).json({ message: friendlyDbError(err) });
   }
 };
 

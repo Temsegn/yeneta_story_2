@@ -23,10 +23,10 @@ const userSchema = new mongoose.Schema(
     email: {
       type: String,
       required: false,
-      unique: true,
-      sparse: true,
       lowercase: true,
       trim: true,
+      // Unique only when a real email is present — blank/null must not collide.
+      // See partial index below (sparse unique still indexes null and causes E11000).
     },
     phoneNumber: {
       type: String,
@@ -114,6 +114,17 @@ const userSchema = new mongoose.Schema(
     ],
   },
   { timestamps: true }
+);
+
+userSchema.index(
+  { email: 1 },
+  {
+    unique: true,
+    name: "email_unique_nonempty",
+    partialFilterExpression: {
+      email: { $exists: true, $type: "string", $gt: "" },
+    },
+  }
 );
 
 userSchema.methods.toJSON = function () {

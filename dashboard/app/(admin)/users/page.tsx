@@ -55,9 +55,14 @@ export default function UsersPage() {
   const onCreate = async (event: FormEvent) => {
     event.preventDefault();
     try {
+      const email = form.email.trim();
       await createUser({
-        ...form,
+        fullName: form.fullName,
+        phoneNumber: form.phoneNumber,
+        password: form.password,
         role: tab === "external" ? "parent" : form.role,
+        securityQuestion: form.securityQuestion || undefined,
+        ...(email ? { email } : {}),
       });
       setShowCreate(false);
       setForm({

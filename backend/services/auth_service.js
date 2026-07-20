@@ -195,6 +195,7 @@ export const updateUserProfile = async (userId, data) => {
 
   if (data.fullName) user.fullName = data.fullName;
 
+  let clearEmail = false;
   if (data.email !== undefined) {
     const normalizedEmail =
       data.email && String(data.email).trim()
@@ -208,7 +209,7 @@ export const updateUserProfile = async (userId, data) => {
       if (existing) throw new Error("Email already in use");
       user.email = normalizedEmail;
     } else {
-      user.email = undefined;
+      clearEmail = true;
     }
   }
 
@@ -223,5 +224,9 @@ export const updateUserProfile = async (userId, data) => {
   }
 
   await user.save();
+  if (clearEmail) {
+    await User.updateOne({ _id: user._id }, { $unset: { email: 1 } });
+    return User.findById(userId);
+  }
   return user;
 };

@@ -75,9 +75,10 @@ export default function UserDetailPage({
           onChange={(e) => setUser({ ...user, fullName: e.target.value })}
         />
         <Input
-          label="Email"
+          label="Email (optional)"
           value={user.email || ""}
           onChange={(e) => setUser({ ...user, email: e.target.value })}
+          hint="Leave blank if the user has no email"
         />
         <Input
           label="Phone"
@@ -115,7 +116,7 @@ export default function UserDetailPage({
               try {
                 await updateUser(id, {
                   fullName: user.fullName,
-                  email: user.email,
+                  email: (user.email || "").trim() || null,
                   phoneNumber: user.phoneNumber,
                   role: user.role,
                   securityQuestion,
