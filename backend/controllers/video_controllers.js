@@ -7,6 +7,7 @@ import {
 } from "../services/video_service.js";
 import { logAction } from "../utils/auditLogger.js";
 import { isInternalRole } from "../middlewares/role_middlewares.js";
+import { notifyContentReleasedSafe } from "../services/notification_service.js";
 
 export const createVideo = async (req, res) => {
   try {
@@ -20,6 +21,10 @@ export const createVideo = async (req, res) => {
       targetId: video._id,
       ipAddress: req.ip,
     });
+
+    if (video.isVisible !== false) {
+      notifyContentReleasedSafe(video.title, "Video", "/videos");
+    }
   } catch (error) {
     res.status(500).json({ message: "Failed to create video", error: error.message });
   }
@@ -58,6 +63,8 @@ export const getVideoById = async (req, res) => {
 
 export const updateVideo = async (req, res) => {
   try {
+    const previous = await getVideoByIdService(req.params.id);
+    const wasHidden = previous.isVisible === false;
     const video = await updateVideoService(req.params.id, req.body);
     res.status(200).json(video);
 
@@ -68,6 +75,10 @@ export const updateVideo = async (req, res) => {
       targetId: req.params.id,
       ipAddress: req.ip,
     });
+
+    if (wasHidden && video.isVisible !== false) {
+      notifyContentReleasedSafe(video.title, "Video", "/videos");
+    }
   } catch (error) {
     res.status(404).json({ message: error.message });
   }

@@ -51,37 +51,12 @@ export async function removeDeviceToken(userId, token) {
   return { message: "Device token removed" };
 }
 
-/**
- * Send a push payload to a user's registered devices.
- * MongoDB owns users/notifications; Firebase Admin is delivery-only.
- */
-export async function sendPushToUser(userId, { title, body, data = {} } = {}) {
-  const user = await User.findById(userId).select("deviceTokens").lean();
-  const tokens = (user?.deviceTokens || []).map((t) => t.token).filter(Boolean);
-  if (!tokens.length) {
-    return { sent: 0, skipped: true, reason: "no_device_tokens" };
-  }
-
-  if (!isFirebaseConfigured()) {
-    console.log(
-      `[push] Firebase Admin not configured — in-app notification saved for ${userId}, device push skipped`
-    );
-    return {
-      sent: 0,
-      skipped: true,
-      reason: "firebase_admin_not_configured",
-      tokens: tokens.length,
-    };
-  }
-
-  const response = await getFirebaseMessaging().sendEachForMulticast({
+function buildMulticastMessage(tokens, { title, body, data = {} }) {
+  return {
     tokens,
     notification: { title, body },
     data: Object.fromEntries(
-      Object.entries(data).map(([key, value]) => [
-        key,
-        String(value ?? ""),
-      ])
+      Object.entries(data).map(([key, value]) => [key, String(value ?? "")])
     ),
     android: {
       priority: "high",
@@ -98,29 +73,73 @@ export async function sendPushToUser(userId, { title, body, data = {} } = {}) {
         },
       },
     },
-  });
+  };
+}
 
+/**
+ * Send a push payload to many FCM tokens (chunks of 500).
+ */
+export async function sendPushToTokens(tokens, payload = {}) {
+  const unique = [...new Set((tokens || []).filter(Boolean))];
+  if (!unique.length) {
+    return { sent: 0, skipped: true, reason: "no_device_tokens" };
+  }
+
+  if (!isFirebaseConfigured()) {
+    console.log(
+      `[push] Firebase Admin not configured — device push skipped (${unique.length} tokens)`
+    );
+    return {
+      sent: 0,
+      skipped: true,
+      reason: "firebase_admin_not_configured",
+      tokens: unique.length,
+    };
+  }
+
+  const messaging = getFirebaseMessaging();
+  let sent = 0;
+  let failed = 0;
   const invalidTokens = [];
-  response.responses.forEach((result, index) => {
-    const code = result.error?.code;
-    if (
-      code === "messaging/registration-token-not-registered" ||
-      code === "messaging/invalid-registration-token"
-    ) {
-      invalidTokens.push(tokens[index]);
-    }
-  });
+
+  for (let i = 0; i < unique.length; i += 500) {
+    const chunk = unique.slice(i, i + 500);
+    const response = await messaging.sendEachForMulticast(
+      buildMulticastMessage(chunk, payload)
+    );
+    sent += response.successCount;
+    failed += response.failureCount;
+    response.responses.forEach((result, index) => {
+      const code = result.error?.code;
+      if (
+        code === "messaging/registration-token-not-registered" ||
+        code === "messaging/invalid-registration-token"
+      ) {
+        invalidTokens.push(chunk[index]);
+      }
+    });
+  }
 
   if (invalidTokens.length) {
-    await User.updateOne(
-      { _id: userId },
+    await User.updateMany(
+      {},
       { $pull: { deviceTokens: { token: { $in: invalidTokens } } } }
     );
   }
 
-  return {
-    sent: response.successCount,
-    failed: response.failureCount,
-    total: tokens.length,
-  };
+  return { sent, failed, total: unique.length };
+}
+
+/**
+ * Send a push payload to a user's registered devices.
+ * MongoDB owns users/notifications; Firebase Admin is delivery-only.
+ */
+export async function sendPushToUser(userId, { title, body, data = {} } = {}) {
+  const user = await User.findById(userId).select("deviceTokens").lean();
+  const tokens = (user?.deviceTokens || []).map((t) => t.token).filter(Boolean);
+  if (!tokens.length) {
+    return { sent: 0, skipped: true, reason: "no_device_tokens" };
+  }
+
+  return sendPushToTokens(tokens, { title, body, data });
 }

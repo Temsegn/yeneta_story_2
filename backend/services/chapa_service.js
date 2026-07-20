@@ -433,11 +433,16 @@ export async function processSuccessfulPayment(txRef, chapaData) {
       targetId: subscription._id,
     });
 
-    await sendPaymentSuccessNotification(payment.userId, plan.price, planId);
-    await sendSubscriptionActivatedNotification(payment.userId, planId);
-
     await session.commitTransaction();
     session.endSession();
+
+    // Notify after commit so payment never rolls back on push/DB notify failure.
+    try {
+      await sendPaymentSuccessNotification(payment.userId, plan.price, planId);
+      await sendSubscriptionActivatedNotification(payment.userId, planId);
+    } catch (notifyErr) {
+      console.error("Payment notify failed:", notifyErr.message);
+    }
 
     return {
       message: "Subscription activated successfully",

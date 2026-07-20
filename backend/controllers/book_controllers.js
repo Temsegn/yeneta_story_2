@@ -7,6 +7,7 @@ import {
 } from "../services/book_service.js";
 import { logAction } from "../utils/auditLogger.js";
 import { isInternalRole } from "../middlewares/role_middlewares.js";
+import { notifyContentReleasedSafe } from "../services/notification_service.js";
 
 export const createBook = async (req, res) => {
   try {
@@ -20,6 +21,10 @@ export const createBook = async (req, res) => {
       targetId: book._id,
       ipAddress: req.ip,
     });
+
+    if (book.isVisible !== false) {
+      notifyContentReleasedSafe(book.title, "Book", "/books");
+    }
   } catch (err) {
     res.status(500).json({ message: "Failed to create book", error: err.message });
   }
@@ -58,6 +63,8 @@ export const getBookById = async (req, res) => {
 
 export const updateBook = async (req, res) => {
   try {
+    const previous = await getBookByIdService(req.params.id);
+    const wasHidden = previous.isVisible === false;
     const book = await updateBookService(req.params.id, req.body);
     res.status(200).json(book);
 
@@ -68,6 +75,10 @@ export const updateBook = async (req, res) => {
       targetId: req.params.id,
       ipAddress: req.ip,
     });
+
+    if (wasHidden && book.isVisible !== false) {
+      notifyContentReleasedSafe(book.title, "Book", "/books");
+    }
   } catch (err) {
     res.status(404).json({ message: err.message });
   }

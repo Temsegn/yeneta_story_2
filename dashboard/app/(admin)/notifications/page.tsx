@@ -37,8 +37,8 @@ export default function NotificationsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Notifications"
-        subtitle="Send in-app and device notifications to parents."
+        title="Release notification"
+        subtitle="Broadcast in-app + push alerts to all parents. New videos, stories, books, and education also notify automatically when published."
       />
 
       <form
@@ -87,7 +87,7 @@ export default function NotificationsPage() {
           </select>
         </label>
         <Button type="submit" disabled={busy}>
-          {busy ? "Sending…" : "Send to all parents"}
+          {busy ? "Releasing…" : "Release notification"}
         </Button>
       </form>
     </div>

@@ -8,6 +8,7 @@ import {
 import { logAction } from "../utils/auditLogger.js";
 import { validationResult } from "express-validator";
 import { isInternalRole } from "../middlewares/role_middlewares.js";
+import { notifyContentReleasedSafe } from "../services/notification_service.js";
 
 export const createStory = async (req, res) => {
   try {
@@ -24,6 +25,10 @@ export const createStory = async (req, res) => {
       targetId: story._id,
       ipAddress: req.ip,
     });
+
+    if (story.isVisible !== false) {
+      notifyContentReleasedSafe(story.title, "Story", "/stories");
+    }
   } catch (error) {
     res.status(500).json({ message: "Failed to create story", error: error.message });
   }
@@ -59,6 +64,8 @@ export const updateStory = async (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) return res.status(400).json({ errors: errors.array() });
 
+    const previous = await getStoryByIdService(req.params.id);
+    const wasHidden = previous.isVisible === false;
     const story = await updateStoryService(req.params.id, req.body);
     res.status(200).json(story);
 
@@ -69,6 +76,10 @@ export const updateStory = async (req, res) => {
       targetId: req.params.id,
       ipAddress: req.ip,
     });
+
+    if (wasHidden && story.isVisible !== false) {
+      notifyContentReleasedSafe(story.title, "Story", "/stories");
+    }
   } catch (error) {
     res.status(404).json({ message: error.message });
   }

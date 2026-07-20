@@ -1,6 +1,6 @@
 import Notification from "../models/notification_models.js";
 import User from "../models/user_model.js";
-import { sendPushToUser } from "./push_service.js";
+import { sendPushToUser, sendPushToTokens } from "./push_service.js";
 
 /**
  * Get user notifications
@@ -153,22 +153,27 @@ export async function broadcastNotification({
   }
 
   const created = await Notification.insertMany(docs);
+
+  const users = await User.find({ _id: { $in: targets } })
+    .select("deviceTokens")
+    .lean();
+  const tokens = users.flatMap((u) =>
+    (u.deviceTokens || []).map((t) => t.token).filter(Boolean)
+  );
+
   let pushed = 0;
-  for (const n of created) {
-    try {
-      const result = await sendPushToUser(n.user, {
-        title: n.title,
-        body: n.message,
-        data: {
-          notificationId: String(n._id),
-          type: n.type,
-          actionUrl: n.actionUrl || "",
-        },
-      });
-      pushed += result.sent || 0;
-    } catch (_) {
-      // keep going
-    }
+  try {
+    const result = await sendPushToTokens(tokens, {
+      title,
+      body: message,
+      data: {
+        type,
+        actionUrl: actionUrl || "",
+      },
+    });
+    pushed = result.sent || 0;
+  } catch (err) {
+    console.error("Broadcast push failed:", err.message);
   }
 
   return { created: created.length, pushed };
@@ -209,6 +214,7 @@ export async function sendPaymentSuccessNotification(userId, amount, plan) {
     title: "Payment Successful",
     message: `Your payment of ${amount} ETB for ${plan} has been processed successfully.`,
     type: "payment",
+    actionUrl: "/subscription",
   });
 }
 
@@ -218,5 +224,27 @@ export async function sendNewContentNotification(userId, contentTitle, contentTy
     title: `New ${contentType} Available`,
     message: `Check out "${contentTitle}" — a new adventure awaits!`,
     type: "content",
+  });
+}
+
+/**
+ * Notify all parents that new content was released (in-app + device push).
+ */
+export async function notifyContentReleased(contentTitle, contentType, actionUrl) {
+  const label = String(contentType || "Content");
+  return broadcastNotification({
+    title: `New ${label} Released`,
+    message: `"${contentTitle}" is now available in Yeneta Story. Open the app to enjoy it!`,
+    type: "content",
+    actionUrl: actionUrl || undefined,
+  });
+}
+
+/**
+ * Fire-and-forget content release notify. Never throws to callers.
+ */
+export function notifyContentReleasedSafe(contentTitle, contentType, actionUrl) {
+  notifyContentReleased(contentTitle, contentType, actionUrl).catch((err) => {
+    console.error("Content release notify failed:", err.message);
   });
 }

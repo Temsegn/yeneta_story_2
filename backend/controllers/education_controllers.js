@@ -7,6 +7,7 @@ import {
 } from "../services/education_service.js";
 import { logAction } from "../utils/auditLogger.js";
 import { isInternalRole } from "../middlewares/role_middlewares.js";
+import { notifyContentReleasedSafe } from "../services/notification_service.js";
 
 export const createEducation = async (req, res) => {
   try {
@@ -19,6 +20,10 @@ export const createEducation = async (req, res) => {
       targetId: item._id,
       ipAddress: req.ip,
     });
+
+    if (item.isVisible !== false) {
+      notifyContentReleasedSafe(item.title, "Education", "/education");
+    }
   } catch (error) {
     res.status(500).json({
       message: "Failed to create education content",
@@ -65,6 +70,8 @@ export const getEducationById = async (req, res) => {
 
 export const updateEducation = async (req, res) => {
   try {
+    const previous = await getEducationByIdService(req.params.id);
+    const wasHidden = previous.isVisible === false;
     const item = await updateEducationService(req.params.id, req.body);
     res.status(200).json(item);
     await logAction({
@@ -74,6 +81,10 @@ export const updateEducation = async (req, res) => {
       targetId: req.params.id,
       ipAddress: req.ip,
     });
+
+    if (wasHidden && item.isVisible !== false) {
+      notifyContentReleasedSafe(item.title, "Education", "/education");
+    }
   } catch (error) {
     res.status(404).json({ message: error.message });
   }
